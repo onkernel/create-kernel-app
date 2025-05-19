@@ -7,7 +7,7 @@
       "typescript": "^5"
     },
     "dependencies": {
-      "@onkernel/sdk": "0.1.0-alpha.11",
+      "@onkernel/sdk": "0.1.0-alpha.12",
       "playwright": "^1.52.0"
     }
   }
