@@ -100,7 +100,7 @@ async function promptForAppName(providedAppName?: string): Promise<string> {
     message: 'What is the name of your project?',
     default: CONFIG.defaultAppName,
     validate: (input: string): boolean | string => {
-      if (/^[A-Za-z0-9_\-]+$/.test(input)) return true;
+      if (/^([A-Za-z\-_\d])+$/.test(input)) return true;
       return 'Project name may only include letters, numbers, underscores and hyphens.';
     }
   }]);
