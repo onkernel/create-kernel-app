@@ -17,28 +17,36 @@ type TemplateKey = 'sample-app' | 'browser-use';
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = { name: string; description: string; languages: LanguageKey[] };
 
+// String constants
+const LANGUAGE_TYPESCRIPT = 'typescript';
+const LANGUAGE_PYTHON = 'python';
+const TEMPLATE_SAMPLE_APP = 'sample-app';
+const TEMPLATE_BROWSER_USE = 'browser-use';
+const LANGUAGE_SHORTHAND_TS = 'ts';
+const LANGUAGE_SHORTHAND_PY = 'py';
+
 // Configuration constants
 const LANGUAGES: Record<LanguageKey, LanguageInfo> = {
-  typescript: { name: 'TypeScript', shorthand: 'ts' },
-  python: { name: 'Python', shorthand: 'py' }
+  [LANGUAGE_TYPESCRIPT]: { name: 'TypeScript', shorthand: LANGUAGE_SHORTHAND_TS },
+  [LANGUAGE_PYTHON]: { name: 'Python', shorthand: LANGUAGE_SHORTHAND_PY }
 };
 
 const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
-  'sample-app': { 
+  [TEMPLATE_SAMPLE_APP]: { 
     name: 'Sample App', 
     description: 'Extracts page title using Playwright',
-    languages: ['typescript', 'python']
+    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON]
   },
-  'browser-use': {
+  [TEMPLATE_BROWSER_USE]: {
     name: 'Browser Use',
     description: 'Implements Browser Use SDK',
-    languages: ['python']
+    languages: [LANGUAGE_PYTHON]
   }
 };
 
 const INVOKE_SAMPLES: Record<string, string> = {
   'ts-basic': 'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
-  'py-basic': 'kernel invoke py-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
+  'python-basic': 'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
   'python-bu': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3", "openai_api_key": "XXX"}\''
 };
 
@@ -59,8 +67,8 @@ function getErrorMessage(error: unknown): string {
 
 // Helper to normalize language input (handle shorthand)
 function normalizeLanguage(language: string): LanguageKey | null {
-  if (language === 'ts') return 'typescript';
-  if (language === 'py') return 'python';
+  if (language === LANGUAGE_SHORTHAND_TS) return LANGUAGE_TYPESCRIPT;
+  if (language === LANGUAGE_SHORTHAND_PY) return LANGUAGE_PYTHON;
   return (LANGUAGES[language as LanguageKey]) ? language as LanguageKey : null;
 }
 
@@ -93,7 +101,7 @@ async function promptForAppName(providedAppName?: string): Promise<string> {
     default: CONFIG.defaultAppName,
     validate: (input: string): boolean | string => {
       if (/^([A-Za-z\-_\d])+$/.test(input)) return true;
-      return 'Project name may only include letters, numbers, underscores and hashes.';
+      return 'Project name may only include letters, numbers, underscores and hyphens.';
     }
   }]);
   
@@ -204,11 +212,11 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
     console.error(chalk.red(`Error: ${getErrorMessage(error)}`));
     
     // Provide manual instructions
-    if (language === 'typescript') {
+    if (language === LANGUAGE_TYPESCRIPT) {
       console.log(chalk.yellow('\nPlease install dependencies manually:'));
       console.log(`  cd ${path.basename(appPath)}`);
       console.log('  npm install');
-    } else if (language === 'python') {
+    } else if (language === LANGUAGE_PYTHON) {
       console.log(chalk.yellow('Please follow the manual setup instructions in the README.'));
     }
   }
@@ -218,11 +226,11 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
 function printNextSteps(appName: string, language: LanguageKey, template: TemplateKey): void {
   // Determine which sample command to show based on language and template
   let sampleCommand = '';
-  if (language === 'typescript') {
+  if (language === LANGUAGE_TYPESCRIPT) {
     sampleCommand = INVOKE_SAMPLES['ts-basic'];
-  } else if (language === 'python') {
-    sampleCommand = template === 'sample-app' 
-      ? INVOKE_SAMPLES['py-basic'] 
+  } else if (language === LANGUAGE_PYTHON) {
+    sampleCommand = template === TEMPLATE_SAMPLE_APP 
+      ? INVOKE_SAMPLES['python-basic'] 
       : INVOKE_SAMPLES['python-bu'];
   }
   
@@ -231,11 +239,36 @@ function printNextSteps(appName: string, language: LanguageKey, template: Templa
 
 Next steps:
   cd ${appName}
-  ${language === 'python' ? 'source .venv/bin/activate && uv pip install .' : ''}
+  ${language === LANGUAGE_PYTHON ? 'uv venv && source .venv/bin/activate && uv sync' : ''}
   export KERNEL_API_KEY=<YOUR_API_KEY>
-  kernel deploy ${language === 'typescript' ? 'index.ts' : 'main.py'}
+  kernel deploy ${language === LANGUAGE_TYPESCRIPT ? 'index.ts' : 'main.py'}
   kernel invoke ${sampleCommand}
   `));
+}
+
+// Validate language and template combination only when both are explicitly provided
+function validateLanguageTemplateCombination(language: LanguageKey | null, template: TemplateKey | null): { isValid: boolean; errorMessage?: string } {
+  // If either is not provided, consider it valid (will be prompted later)
+  if (!language || !template) {
+    return { isValid: true };
+  }
+  
+  if (!TEMPLATES[template as TemplateKey]) {
+    return { 
+      isValid: false, 
+      errorMessage: `Invalid template '${template}'. Available templates: ${Object.keys(TEMPLATES).join(', ')}` 
+    };
+  }
+  
+  if (!isTemplateValidForLanguage(template, language)) {
+    return { 
+      isValid: false, 
+      errorMessage: `Template '${template}' is not available for ${LANGUAGES[language].name}. ` +
+        `This template is only available for: ${TEMPLATES[template as TemplateKey].languages.map(l => LANGUAGES[l].name).join(', ')}` 
+    };
+  }
+  
+  return { isValid: true };
 }
 
 // Main program
@@ -246,50 +279,31 @@ program
   .description('Create a new Kernel application')
   .version('0.1.0')
   .argument('[app-name]', 'Name of your Kernel app')
-  .option('-l, --language <language>', 'Programming language (typescript/ts, python/py)')
-  .option('-t, --template <template>', 'Template type (sample-app, browser-use)')
+  .option('-l, --language <language>', `Programming language (${LANGUAGE_TYPESCRIPT}/${LANGUAGE_SHORTHAND_TS}, ${LANGUAGE_PYTHON}/${LANGUAGE_SHORTHAND_PY})`)
+  .option('-t, --template <template>', `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE})`)
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
-      // First determine which languages are available based on template
-      let supportedLanguages: LanguageKey[] = Object.keys(LANGUAGES) as LanguageKey[];
-      
-      // If template specified, check language compatibility
-      if (options.template && TEMPLATES[options.template as TemplateKey]) {
-        supportedLanguages = TEMPLATES[options.template as TemplateKey].languages;
+      // Only validate if both language and template are provided
+      if (options.language?.toLowerCase() && options.template?.toLowerCase()) {
+        const normalizedLanguage = normalizeLanguage(options.language);
+        const validation = validateLanguageTemplateCombination(normalizedLanguage, options.template as TemplateKey);
         
-        // If user specified incompatible language, warn them
-        if (
-          options.language && 
-          normalizeLanguage(options.language) && 
-          !supportedLanguages.includes(normalizeLanguage(options.language) as LanguageKey)
-        ) {
-          console.log(
-            chalk.yellow(`Template '${options.template}' is not available for ${options.language}.`)
-          );
-          console.log(
-            chalk.yellow(`This template is only available for: ${supportedLanguages.join(', ')}`)
-          );
-          
-          // If only one language is supported, force it
-          if (supportedLanguages.length === 1) {
-            console.log(chalk.yellow(`Using ${supportedLanguages[0]} instead.`));
-            options.language = supportedLanguages[0];
-          } else {
-            // Otherwise, unset the language to prompt for it
-            options.language = undefined;
-          }
+        if (!validation.isValid) {
+          console.error(chalk.red('Error:'), validation.errorMessage);
+          console.log(chalk.yellow('\nPlease try again with a valid combination.'));
+          process.exit(1);
         }
       }
       
       // Get user inputs (with prompts if needed)
       const finalAppName = await promptForAppName(appName);
-      const language = await promptForLanguage(options.language, supportedLanguages);
+      const language = await promptForLanguage(options.language);
       const template = await promptForTemplate(language, options.template);
       
       const appPath = path.resolve(finalAppName);
       
       // Set up the project
-      console.log(chalk.blue(`\nCreating a new ${LANGUAGES[language].name} ${TEMPLATES[template].name} in ${appPath}...\n`));
+      console.log(chalk.blue(`\nCreating a new ${LANGUAGES[language].name} ${TEMPLATES[template].name}\n`));
       
       await prepareProjectDirectory(appPath);
       copyTemplateFiles(appPath, language, template);

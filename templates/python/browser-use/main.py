@@ -29,7 +29,7 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
     
     llm = ChatOpenAI(model="gpt-4o")
     
-    kernel_browser = client.browser.create(invocation_id=ctx.invocation_id)
+    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
     print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
     agent = Agent(
         #task="Compare the price of gpt-4o and DeepSeek-V3",
