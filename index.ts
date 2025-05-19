@@ -217,7 +217,9 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
       console.log(`  cd ${path.basename(appPath)}`);
       console.log('  npm install');
     } else if (language === LANGUAGE_PYTHON) {
-      console.log(chalk.yellow('Please follow the manual setup instructions in the README.'));
+      console.log(chalk.yellow('\nPlease install dependencies manually:'));
+      console.log(`  cd ${path.basename(appPath)}`);
+      console.log('  uv venv && source .venv/bin/activate && uv sync');
     }
   }
 }
