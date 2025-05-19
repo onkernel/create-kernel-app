@@ -17,22 +17,30 @@ type TemplateKey = 'sample-app' | 'browser-use';
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = { name: string; description: string; languages: LanguageKey[] };
 
+// String constants
+const LANGUAGE_TYPESCRIPT = 'typescript';
+const LANGUAGE_PYTHON = 'python';
+const TEMPLATE_SAMPLE_APP = 'sample-app';
+const TEMPLATE_BROWSER_USE = 'browser-use';
+const LANGUAGE_SHORTHAND_TS = 'ts';
+const LANGUAGE_SHORTHAND_PY = 'py';
+
 // Configuration constants
 const LANGUAGES: Record<LanguageKey, LanguageInfo> = {
-  typescript: { name: 'TypeScript', shorthand: 'ts' },
-  python: { name: 'Python', shorthand: 'py' }
+  [LANGUAGE_TYPESCRIPT]: { name: 'TypeScript', shorthand: LANGUAGE_SHORTHAND_TS },
+  [LANGUAGE_PYTHON]: { name: 'Python', shorthand: LANGUAGE_SHORTHAND_PY }
 };
 
 const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
-  'sample-app': { 
+  [TEMPLATE_SAMPLE_APP]: { 
     name: 'Sample App', 
     description: 'Extracts page title using Playwright',
-    languages: ['typescript', 'python']
+    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON]
   },
-  'browser-use': {
+  [TEMPLATE_BROWSER_USE]: {
     name: 'Browser Use',
     description: 'Implements Browser Use SDK',
-    languages: ['python']
+    languages: [LANGUAGE_PYTHON]
   }
 };
 
@@ -59,8 +67,8 @@ function getErrorMessage(error: unknown): string {
 
 // Helper to normalize language input (handle shorthand)
 function normalizeLanguage(language: string): LanguageKey | null {
-  if (language === 'ts') return 'typescript';
-  if (language === 'py') return 'python';
+  if (language === LANGUAGE_SHORTHAND_TS) return LANGUAGE_TYPESCRIPT;
+  if (language === LANGUAGE_SHORTHAND_PY) return LANGUAGE_PYTHON;
   return (LANGUAGES[language as LanguageKey]) ? language as LanguageKey : null;
 }
 
@@ -204,11 +212,11 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
     console.error(chalk.red(`Error: ${getErrorMessage(error)}`));
     
     // Provide manual instructions
-    if (language === 'typescript') {
+    if (language === LANGUAGE_TYPESCRIPT) {
       console.log(chalk.yellow('\nPlease install dependencies manually:'));
       console.log(`  cd ${path.basename(appPath)}`);
       console.log('  npm install');
-    } else if (language === 'python') {
+    } else if (language === LANGUAGE_PYTHON) {
       console.log(chalk.yellow('Please follow the manual setup instructions in the README.'));
     }
   }
@@ -218,10 +226,10 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
 function printNextSteps(appName: string, language: LanguageKey, template: TemplateKey): void {
   // Determine which sample command to show based on language and template
   let sampleCommand = '';
-  if (language === 'typescript') {
+  if (language === LANGUAGE_TYPESCRIPT) {
     sampleCommand = INVOKE_SAMPLES['ts-basic'];
-  } else if (language === 'python') {
-    sampleCommand = template === 'sample-app' 
+  } else if (language === LANGUAGE_PYTHON) {
+    sampleCommand = template === TEMPLATE_SAMPLE_APP 
       ? INVOKE_SAMPLES['py-basic'] 
       : INVOKE_SAMPLES['python-bu'];
   }
@@ -231,9 +239,9 @@ function printNextSteps(appName: string, language: LanguageKey, template: Templa
 
 Next steps:
   cd ${appName}
-  ${language === 'python' ? 'source .venv/bin/activate && uv pip install .' : ''}
+  ${language === LANGUAGE_PYTHON ? 'source .venv/bin/activate && uv pip install .' : ''}
   export KERNEL_API_KEY=<YOUR_API_KEY>
-  kernel deploy ${language === 'typescript' ? 'index.ts' : 'main.py'}
+  kernel deploy ${language === LANGUAGE_TYPESCRIPT ? 'index.ts' : 'main.py'}
   kernel invoke ${sampleCommand}
   `));
 }
@@ -271,8 +279,8 @@ program
   .description('Create a new Kernel application')
   .version('0.1.0')
   .argument('[app-name]', 'Name of your Kernel app')
-  .option('-l, --language <language>', 'Programming language (typescript/ts, python/py)')
-  .option('-t, --template <template>', 'Template type (sample-app, browser-use)')
+  .option('-l, --language <language>', `Programming language (${LANGUAGE_TYPESCRIPT}/${LANGUAGE_SHORTHAND_TS}, ${LANGUAGE_PYTHON}/${LANGUAGE_SHORTHAND_PY})`)
+  .option('-t, --template <template>', `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE})`)
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
       // Only validate if both language and template are provided
