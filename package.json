@@ -1,16 +1,24 @@
 {
-  "name": "create-kernel-app",
-  "version": "1.0.0",
-  "description": "Kernel application templates",
-  "main": "index.js",
+  "name": "@onkernel/create-kernel-app",
+  "version": "0.1.0",
+  "description": "Create Kernel sample applications",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
     "create-kernel-app": "bin/index.js"
   },
   "files": [
     "bin",
+    "dist",
     "templates"
   ],
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onkernel/create-kernel-app.git"
+  },
   "scripts": {
     "build": "bun build ./index.ts --outdir ./dist --target node",
     "lint": "bun run eslint .",
@@ -22,7 +30,9 @@
     "cli",
     "scaffolding",
     "automation",
-    "playwright"
+    "playwright",
+    "browser-automation",
+    "templates"
   ],
   "author": "Kernel",
   "license": "MIT",
@@ -50,5 +60,12 @@
     "fs-extra",
     "inquirer",
     "ora"
-  ]
+  ],
+  "homepage": "https://onkernel.com",
+  "bugs": {
+    "url": "https://github.com/onkernel/create-kernel-app/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
