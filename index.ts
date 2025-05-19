@@ -100,8 +100,8 @@ async function promptForAppName(providedAppName?: string): Promise<string> {
     message: 'What is the name of your project?',
     default: CONFIG.defaultAppName,
     validate: (input: string): boolean | string => {
-      if (/^([A-Za-z\-_\d])+$/.test(input)) return true;
-      return 'Project name may only include letters, numbers, underscores and hashes.';
+      if (/^[A-Za-z0-9_\-]+$/.test(input)) return true;
+      return 'Project name may only include letters, numbers, underscores and hyphens.';
     }
   }]);
   
@@ -239,7 +239,7 @@ function printNextSteps(appName: string, language: LanguageKey, template: Templa
 
 Next steps:
   cd ${appName}
-  ${language === LANGUAGE_PYTHON ? 'source .venv/bin/activate && uv pip install .' : ''}
+  ${language === LANGUAGE_PYTHON ? 'uv sync' : ''}
   export KERNEL_API_KEY=<YOUR_API_KEY>
   kernel deploy ${language === LANGUAGE_TYPESCRIPT ? 'index.ts' : 'main.py'}
   kernel invoke ${sampleCommand}
@@ -247,7 +247,7 @@ Next steps:
 }
 
 // Validate language and template combination only when both are explicitly provided
-function validateLanguageTemplateCombination(language: LanguageKey | null, template: string | undefined): { isValid: boolean; errorMessage?: string } {
+function validateLanguageTemplateCombination(language: LanguageKey | null, template: TemplateKey | null): { isValid: boolean; errorMessage?: string } {
   // If either is not provided, consider it valid (will be prompted later)
   if (!language || !template) {
     return { isValid: true };
@@ -284,9 +284,9 @@ program
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
       // Only validate if both language and template are provided
-      if (options.language && options.template) {
+      if (options.language?.toLowerCase() && options.template?.toLowerCase()) {
         const normalizedLanguage = normalizeLanguage(options.language);
-        const validation = validateLanguageTemplateCombination(normalizedLanguage, options.template);
+        const validation = validateLanguageTemplateCombination(normalizedLanguage, options.template as TemplateKey);
         
         if (!validation.isValid) {
           console.error(chalk.red('Error:'), validation.errorMessage);
