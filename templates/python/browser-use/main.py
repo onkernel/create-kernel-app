@@ -12,6 +12,10 @@ app = kernel.App("python-bu")
 class TaskInput(TypedDict):
     task: str
     openai_api_key: str
+    
+# LLM API Keys are set in the environment during `kernel deploy <filename> --env OPENAI_API_KEY=XXX`
+# See https://docs.onkernel.com/launch/deploy#environment-variables
+llm = ChatOpenAI(model="gpt-4o")
 
 @app.action("bu-task")
 async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
@@ -25,9 +29,6 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
     Returns:
         An object with final_result and errors properties
     """
-    os.environ["OPENAI_API_KEY"] = input_data["openai_api_key"]
-    
-    llm = ChatOpenAI(model="gpt-4o")
     
     kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
     print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)

@@ -41,17 +41,17 @@ create-kernel-app [app-name] [options]
 
 Create a TypeScript application with a sample app:
 ```bash
-npx create-kernel-app my-app --language typescript --template sample-app
+npx @onkernel/create-kernel-app my-app --language typescript --template sample-app
 ```
 
 Create a Python application with a sample app:
 ```bash
-npx create-kernel-app my-app --language python --template sample-app
+npx @onkernel/create-kernel-app my-app --language python --template sample-app
 ```
 
 Create a Python application with Browser Use template:
 ```bash
-npx create-kernel-app my-app --language python --template browser-use
+npx @onkernel/create-kernel-app my-app --language python --template browser-use
 ```
 
 ## Next Steps

@@ -45,9 +45,9 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
 };
 
 const INVOKE_SAMPLES: Record<string, string> = {
-  'ts-basic': 'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
-  'python-basic': 'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
-  'python-bu': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3", "openai_api_key": "XXX"}\''
+  'typescript-sample-app': 'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
+  'python-sample-app': 'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
+  'python-browser-use': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\''
 };
 
 const CONFIG = {
@@ -227,50 +227,22 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
 // Print success message with next steps
 function printNextSteps(appName: string, language: LanguageKey, template: TemplateKey): void {
   // Determine which sample command to show based on language and template
-  let sampleCommand = '';
-  if (language === LANGUAGE_TYPESCRIPT) {
-    sampleCommand = INVOKE_SAMPLES['ts-basic'];
-  } else if (language === LANGUAGE_PYTHON) {
-    sampleCommand = template === TEMPLATE_SAMPLE_APP 
-      ? INVOKE_SAMPLES['python-basic'] 
-      : INVOKE_SAMPLES['python-bu'];
-  }
+  const deployCommand = language === LANGUAGE_TYPESCRIPT ? 'kernel deploy index.ts'
+  : language === LANGUAGE_PYTHON && template === TEMPLATE_SAMPLE_APP ? 'kernel deploy main.py'
+  : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE ? 'kernel deploy main.py --env OPENAI_API_KEY=XXX'
+  : '';
   
+
   console.log(chalk.green(`
 🎉 Kernel app created successfully!
 
 Next steps:
   cd ${appName}
-  ${language === LANGUAGE_PYTHON ? 'uv venv && source .venv/bin/activate && uv sync' : ''}
   export KERNEL_API_KEY=<YOUR_API_KEY>
-  kernel deploy ${language === LANGUAGE_TYPESCRIPT ? 'index.ts' : 'main.py'}
-  kernel invoke ${sampleCommand}
+  ${language === LANGUAGE_PYTHON ? 'uv venv && source .venv/bin/activate && uv sync' : ''}
+  ${deployCommand}
+  ${INVOKE_SAMPLES[`${language}-${template}`]}
   `));
-}
-
-// Validate language and template combination only when both are explicitly provided
-function validateLanguageTemplateCombination(language: LanguageKey | null, template: TemplateKey | null): { isValid: boolean; errorMessage?: string } {
-  // If either is not provided, consider it valid (will be prompted later)
-  if (!language || !template) {
-    return { isValid: true };
-  }
-  
-  if (!TEMPLATES[template as TemplateKey]) {
-    return { 
-      isValid: false, 
-      errorMessage: `Invalid template '${template}'. Available templates: ${Object.keys(TEMPLATES).join(', ')}` 
-    };
-  }
-  
-  if (!isTemplateValidForLanguage(template, language)) {
-    return { 
-      isValid: false, 
-      errorMessage: `Template '${template}' is not available for ${LANGUAGES[language].name}. ` +
-        `This template is only available for: ${TEMPLATES[template as TemplateKey].languages.map(l => LANGUAGES[l].name).join(', ')}` 
-    };
-  }
-  
-  return { isValid: true };
 }
 
 // Main program
@@ -285,22 +257,44 @@ program
   .option('-t, --template <template>', `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE})`)
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
-      // Only validate if both language and template are provided
-      if (options.language?.toLowerCase() && options.template?.toLowerCase()) {
-        const normalizedLanguage = normalizeLanguage(options.language);
-        const validation = validateLanguageTemplateCombination(normalizedLanguage, options.template as TemplateKey);
-        
-        if (!validation.isValid) {
-          console.error(chalk.red('Error:'), validation.errorMessage);
-          console.log(chalk.yellow('\nPlease try again with a valid combination.'));
-          process.exit(1);
+      let normalizedLanguage: LanguageKey | null = null;
+      let normalizedTemplate: TemplateKey | null = null;
+      
+      // Try to normalize and validate language if provided
+      if (options.language?.toLowerCase()) {
+        normalizedLanguage = normalizeLanguage(options.language);
+        if (!normalizedLanguage) {
+          console.log(chalk.yellow(`\nInvalid language '${options.language}'. Please select a valid language.`));
+        }
+      }
+      
+      // Try to normalize and validate template if provided
+      if (options.template?.toLowerCase()) {
+        normalizedTemplate = options.template as TemplateKey;
+        if (!TEMPLATES[normalizedTemplate]) {
+          console.log(chalk.yellow(`\nInvalid template '${options.template}'. Please select a valid template.`));
+          normalizedTemplate = null;
+        }
+      }
+      
+      // If both are provided, validate the combination
+      if (normalizedLanguage && normalizedTemplate) {
+        console.log(normalizedLanguage, normalizedTemplate);
+        const isValid = isTemplateValidForLanguage(normalizedTemplate, normalizedLanguage);
+        if (!isValid) {
+          const errorMessage =  `Template '${normalizedTemplate}' is not available for ${LANGUAGES[normalizedLanguage].name}. ` +
+            `This template is only available for: ${TEMPLATES[normalizedTemplate as TemplateKey].languages.map(l => LANGUAGES[l].name).join(', ')}` 
+          console.log(chalk.yellow(`\n${errorMessage}`));
+          // Reset both to force prompting
+          normalizedLanguage = null;
+          normalizedTemplate = null;
         }
       }
       
       // Get user inputs (with prompts if needed)
       const finalAppName = await promptForAppName(appName);
-      const language = await promptForLanguage(options.language);
-      const template = await promptForTemplate(language, options.template);
+      const language = await promptForLanguage(normalizedLanguage || undefined);
+      const template = await promptForTemplate(language, normalizedTemplate || undefined);
       
       const appPath = path.resolve(finalAppName);
       
