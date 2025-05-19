@@ -12,10 +12,10 @@
     "templates"
   ],
   "scripts": {
-    "build": "tsc",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "npm run lint && npm run build"
+    "build": "bun build ./index.ts --outdir ./dist --target node",
+    "lint": "bun run eslint .",
+    "lint:fix": "bun run eslint . --fix",
+    "prepublishOnly": "bun run lint && bun run build"
   },
   "keywords": [
     "kernel",
@@ -43,5 +43,12 @@
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "typescript": "^4.8.4"
-  }
+  },
+  "trustedDependencies": [
+    "chalk",
+    "commander",
+    "fs-extra",
+    "inquirer",
+    "ora"
+  ]
 }

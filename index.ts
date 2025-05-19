@@ -238,6 +238,31 @@ Next steps:
   `));
 }
 
+// Validate language and template combination only when both are explicitly provided
+function validateLanguageTemplateCombination(language: LanguageKey | null, template: string | undefined): { isValid: boolean; errorMessage?: string } {
+  // If either is not provided, consider it valid (will be prompted later)
+  if (!language || !template) {
+    return { isValid: true };
+  }
+  
+  if (!TEMPLATES[template as TemplateKey]) {
+    return { 
+      isValid: false, 
+      errorMessage: `Invalid template '${template}'. Available templates: ${Object.keys(TEMPLATES).join(', ')}` 
+    };
+  }
+  
+  if (!isTemplateValidForLanguage(template, language)) {
+    return { 
+      isValid: false, 
+      errorMessage: `Template '${template}' is not available for ${LANGUAGES[language].name}. ` +
+        `This template is only available for: ${TEMPLATES[template as TemplateKey].languages.map(l => LANGUAGES[l].name).join(', ')}` 
+    };
+  }
+  
+  return { isValid: true };
+}
+
 // Main program
 const program = new Command();
 
@@ -250,46 +275,27 @@ program
   .option('-t, --template <template>', 'Template type (sample-app, browser-use)')
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
-      // First determine which languages are available based on template
-      let supportedLanguages: LanguageKey[] = Object.keys(LANGUAGES) as LanguageKey[];
-      
-      // If template specified, check language compatibility
-      if (options.template && TEMPLATES[options.template as TemplateKey]) {
-        supportedLanguages = TEMPLATES[options.template as TemplateKey].languages;
+      // Only validate if both language and template are provided
+      if (options.language && options.template) {
+        const normalizedLanguage = normalizeLanguage(options.language);
+        const validation = validateLanguageTemplateCombination(normalizedLanguage, options.template);
         
-        // If user specified incompatible language, warn them
-        if (
-          options.language && 
-          normalizeLanguage(options.language) && 
-          !supportedLanguages.includes(normalizeLanguage(options.language) as LanguageKey)
-        ) {
-          console.log(
-            chalk.yellow(`Template '${options.template}' is not available for ${options.language}.`)
-          );
-          console.log(
-            chalk.yellow(`This template is only available for: ${supportedLanguages.join(', ')}`)
-          );
-          
-          // If only one language is supported, force it
-          if (supportedLanguages.length === 1) {
-            console.log(chalk.yellow(`Using ${supportedLanguages[0]} instead.`));
-            options.language = supportedLanguages[0];
-          } else {
-            // Otherwise, unset the language to prompt for it
-            options.language = undefined;
-          }
+        if (!validation.isValid) {
+          console.error(chalk.red('Error:'), validation.errorMessage);
+          console.log(chalk.yellow('\nPlease try again with a valid combination.'));
+          process.exit(1);
         }
       }
       
       // Get user inputs (with prompts if needed)
       const finalAppName = await promptForAppName(appName);
-      const language = await promptForLanguage(options.language, supportedLanguages);
+      const language = await promptForLanguage(options.language);
       const template = await promptForTemplate(language, options.template);
       
       const appPath = path.resolve(finalAppName);
       
       // Set up the project
-      console.log(chalk.blue(`\nCreating a new ${LANGUAGES[language].name} ${TEMPLATES[template].name} in ${appPath}...\n`));
+      console.log(chalk.blue(`\nCreating a new ${LANGUAGES[language].name} ${TEMPLATES[template].name}\n`));
       
       await prepareProjectDirectory(appPath);
       copyTemplateFiles(appPath, language, template);
