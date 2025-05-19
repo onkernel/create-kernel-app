@@ -28,8 +28,8 @@ app.action<PageTitleInput, PageTitleOutput>(
       throw new Error('URL is required');
     }
 
-    const kernelBrowser = await kernel.browser.createSession({
-      invocationId: ctx.invocationId,
+    const kernelBrowser = await kernel.browsers.create({
+      invocation_id: ctx.invocation_id,
     });
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);

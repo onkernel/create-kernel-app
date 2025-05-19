@@ -46,7 +46,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
 
 const INVOKE_SAMPLES: Record<string, string> = {
   'ts-basic': 'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
-  'py-basic': 'kernel invoke py-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
+  'python-basic': 'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
   'python-bu': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3", "openai_api_key": "XXX"}\''
 };
 
@@ -230,7 +230,7 @@ function printNextSteps(appName: string, language: LanguageKey, template: Templa
     sampleCommand = INVOKE_SAMPLES['ts-basic'];
   } else if (language === LANGUAGE_PYTHON) {
     sampleCommand = template === TEMPLATE_SAMPLE_APP 
-      ? INVOKE_SAMPLES['py-basic'] 
+      ? INVOKE_SAMPLES['python-basic'] 
       : INVOKE_SAMPLES['python-bu'];
   }
   
@@ -239,7 +239,7 @@ function printNextSteps(appName: string, language: LanguageKey, template: Templa
 
 Next steps:
   cd ${appName}
-  ${language === LANGUAGE_PYTHON ? 'uv sync' : ''}
+  ${language === LANGUAGE_PYTHON ? 'uv venv && source .venv/bin/activate && uv sync' : ''}
   export KERNEL_API_KEY=<YOUR_API_KEY>
   kernel deploy ${language === LANGUAGE_TYPESCRIPT ? 'index.ts' : 'main.py'}
   kernel invoke ${sampleCommand}

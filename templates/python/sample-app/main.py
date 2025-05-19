@@ -31,7 +31,7 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
         raise ValueError("URL is required and must be a string")
     
     # Create a browser instance using the context's invocation_id
-    kernel_browser = client.browser.create_session(invocation_id=ctx.invocation_id)
+    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
     
     async with async_playwright() as playwright:
         browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
