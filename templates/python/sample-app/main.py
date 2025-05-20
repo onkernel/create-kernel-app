@@ -2,6 +2,7 @@ import kernel
 from kernel import Kernel
 from playwright.async_api import async_playwright
 from typing import TypedDict
+from urllib.parse import urlparse
 
 client = Kernel()
 
@@ -29,7 +30,17 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
     url = input_data.get("url")
     if not url or not isinstance(url, str):
         raise ValueError("URL is required and must be a string")
-    
+
+    # Add https:// if no protocol is present
+    if not url.startswith(('http://', 'https://')):
+        url = f"https://{url}"
+
+    # Validate the URL
+    try:
+        urlparse(url)
+    except Exception:
+        raise ValueError(f"Invalid URL: {url}")
+
     # Create a browser instance using the context's invocation_id
     kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
     

@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 
 const kernel = new Kernel();
 
-const app = kernel.app('ts-basic-cj');
+const app = kernel.app('ts-basic');
 
 interface PageTitleInput {
   url: string;
@@ -26,6 +26,17 @@ app.action<PageTitleInput, PageTitleOutput>(
     //     A dictionary containing the page title
     if (!payload?.url) {
       throw new Error('URL is required');
+    }
+    
+    if (!payload.url.startsWith('http://') && !payload.url.startsWith('https://')) {
+      payload.url = `https://${payload.url}`;
+    }
+
+    // Validate the URL
+    try {
+      new URL(payload.url);
+    } catch {
+      throw new Error(`Invalid URL: ${payload.url}`);
     }
 
     const kernelBrowser = await kernel.browsers.create({
