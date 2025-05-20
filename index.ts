@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 // Types for better type safety
 type LanguageKey = 'typescript' | 'python';
-type TemplateKey = 'sample-app' | 'browser-use';
+type TemplateKey = 'sample-app' | 'browser-use' | 'stagehand';
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = { name: string; description: string; languages: LanguageKey[] };
 
@@ -22,6 +22,7 @@ const LANGUAGE_TYPESCRIPT = 'typescript';
 const LANGUAGE_PYTHON = 'python';
 const TEMPLATE_SAMPLE_APP = 'sample-app';
 const TEMPLATE_BROWSER_USE = 'browser-use';
+const TEMPLATE_STAGEHAND = 'stagehand';
 const LANGUAGE_SHORTHAND_TS = 'ts';
 const LANGUAGE_SHORTHAND_PY = 'py';
 
@@ -41,13 +42,19 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     name: 'Browser Use',
     description: 'Implements Browser Use SDK',
     languages: [LANGUAGE_PYTHON]
-  }
+  },
+  [TEMPLATE_STAGEHAND]: { 
+    name: 'Stagehand', 
+    description: 'Implements the Stagehand SDK',
+    languages: [LANGUAGE_TYPESCRIPT]
+  },
 };
 
 const INVOKE_SAMPLES: Record<string, string> = {
   'typescript-sample-app': 'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
   'python-sample-app': 'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
-  'python-browser-use': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\''
+  'python-browser-use': 'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
+  'typescript-stagehand': 'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\''
 };
 
 const CONFIG = {
@@ -227,7 +234,8 @@ async function setupDependencies(appPath: string, language: LanguageKey): Promis
 // Print success message with next steps
 function printNextSteps(appName: string, language: LanguageKey, template: TemplateKey): void {
   // Determine which sample command to show based on language and template
-  const deployCommand = language === LANGUAGE_TYPESCRIPT ? 'kernel deploy index.ts'
+  const deployCommand = language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_SAMPLE_APP ? 'kernel deploy index.ts'
+  : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_STAGEHAND ? 'kernel deploy index.ts --env OPENAI_API_KEY=XXX'
   : language === LANGUAGE_PYTHON && template === TEMPLATE_SAMPLE_APP ? 'kernel deploy main.py'
   : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE ? 'kernel deploy main.py --env OPENAI_API_KEY=XXX'
   : '';
@@ -254,7 +262,7 @@ program
   .version('0.1.0')
   .argument('[app-name]', 'Name of your Kernel app')
   .option('-l, --language <language>', `Programming language (${LANGUAGE_TYPESCRIPT}/${LANGUAGE_SHORTHAND_TS}, ${LANGUAGE_PYTHON}/${LANGUAGE_SHORTHAND_PY})`)
-  .option('-t, --template <template>', `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE})`)
+  .option('-t, --template <template>', `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND})`)
   .action(async (appName: string, options: { language?: string; template?: string }) => {
     try {
       let normalizedLanguage: LanguageKey | null = null;

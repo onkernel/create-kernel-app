@@ -11,7 +11,6 @@ app = kernel.App("python-bu")
 
 class TaskInput(TypedDict):
     task: str
-    openai_api_key: str
     
 # LLM API Keys are set in the environment during `kernel deploy <filename> --env OPENAI_API_KEY=XXX`
 # See https://docs.onkernel.com/launch/deploy#environment-variables
@@ -24,7 +23,7 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
     
     Args:
         ctx: Kernel context containing invocation information
-        input_data: An object with task and openai_api_key properties
+        input_data: An object with task properties
         
     Returns:
         An object with final_result and errors properties
