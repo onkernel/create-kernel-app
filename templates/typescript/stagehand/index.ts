@@ -16,17 +16,17 @@ interface SearchQueryOutput {
 
 app.action<SearchQueryInput, SearchQueryOutput>(
   'stagehand-task',
-  async (ctx: KernelContext, input: SearchQueryInput): Promise<SearchQueryOutput> => {
+  async (ctx: KernelContext, payload?: SearchQueryInput): Promise<SearchQueryOutput> => {
     // A function that returns the first search result of a given search query from Google
     
     // Args:
     //     ctx: Kernel context containing invocation information
-    //     input: A search query string
+    //     payload: A search query string
         
     // Returns:
     //     output: The URL of the first search result
 
-    if (!input.query) {
+    if (!payload?.query) {
       throw new Error('Query is required');
     }
 
@@ -47,7 +47,7 @@ app.action<SearchQueryInput, SearchQueryOutput>(
     await stagehand.init();
     const page = stagehand.page;
     await page.goto("https://www.google.com");
-    await page.act(`Type in ${input.query} into the search bar`);
+    await page.act(`Type in ${payload.query} into the search bar`);
 
     const { output } = await page.extract({
       instruction: "The url of the first search result",

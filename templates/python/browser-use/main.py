@@ -3,7 +3,6 @@ from browser_use import Agent, Browser, BrowserConfig
 import kernel
 from kernel import Kernel
 from typing import TypedDict
-import os
 
 client = Kernel()
 

@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 
 const kernel = new Kernel();
 
-const app = kernel.app('ts-basic');
+const app = kernel.app('ts-basic-cj');
 
 interface PageTitleInput {
   url: string;
@@ -15,16 +15,16 @@ interface PageTitleOutput {
 
 app.action<PageTitleInput, PageTitleOutput>(
   'get-page-title',
-  async (ctx: KernelContext, input: PageTitleInput): Promise<PageTitleOutput> => {
+  async (ctx: KernelContext, payload?: PageTitleInput): Promise<PageTitleOutput> => {
     // A function that extracts the title of a webpage
     
     // Args:
     //     ctx: Kernel context containing invocation information
-    //     input_data: An object with a URL property
+    //     payload: An object with a URL property
         
     // Returns:
     //     A dictionary containing the page title
-    if (!input.url) {
+    if (!payload?.url) {
       throw new Error('URL is required');
     }
 
@@ -37,7 +37,7 @@ app.action<PageTitleInput, PageTitleOutput>(
     const page = await context.newPage();
 
     try {
-      await page.goto(input.url);
+      await page.goto(payload.url);
       const title = await page.title();
       return { title };
     } finally {
