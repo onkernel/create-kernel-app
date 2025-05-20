@@ -11,8 +11,9 @@ A CLI tool to create the scaffolding for a  new Kernel applications. This tool h
 - 📦 Multiple template options:
   - Sample App: A basic template that extracts page titles using Playwright
   - Browser Use: A template implementing the Browser Use SDK
+  - Stagehand: A template implementing the Stagehand SDK
 - ⚡️ Automatic dependency setup
-- 🫶 Interactive CLI with helpful prompts
+- 🫶 Interactive CLI
 
 ## Set-Up
 
@@ -36,12 +37,18 @@ create-kernel-app [app-name] [options]
 - `-t, --template <template>`: Select a template
   - `sample-app`: Basic template with Playwright integration
   - `browser-use`: Template with Browser Use SDK (Python only)
+  - `stagehand`: Template with Stagehand SDK (Typescript only)
 
 ### Examples
 
 Create a TypeScript application with a sample app:
 ```bash
 npx @onkernel/create-kernel-app my-app --language typescript --template sample-app
+```
+
+Create a Typescript application with Stagehand template:
+```bash
+npx @onkernel/create-kernel-app my-app --language typescript --template stagehand
 ```
 
 Create a Python application with a sample app:
@@ -59,26 +66,54 @@ npx @onkernel/create-kernel-app my-app --language python --template browser-use
 After creating your application:
 
 1. Navigate to your project directory:
-   ```bash
-   cd my-app
-   ```
+```bash
+cd my-app
+```
 
 2. Set up your environment:
-   - For TypeScript: `npm install`
-   - For Python: `uv venv && source .venv/bin/activate && uv sync`
+- For TypeScript: `npm install`
+- For Python: `uv venv && source .venv/bin/activate && uv sync`
 
 3. Set your Kernel API key:
-   ```bash
-   export KERNEL_API_KEY=<YOUR_API_KEY>
-   ```
+```bash
+export KERNEL_API_KEY=<YOUR_API_KEY>
+```
 
 4. Deploy your application:
-   ```bash
-   kernel deploy index.ts  # for TypeScript
-   kernel deploy main.py   # for Python
-   ```
+```bash
+# Typscript
+kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand
 
-5. Try out your application using the provided sample commands in the project README.
+# Python
+kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
+```
+
+If deploying an app that requires environment variables, make sure to [set them](https://docs.onkernel.com/launch/deploy#environment-variables) when you `deploy`.
+
+5. Invoke your application:
+```bash
+# Typescript + Sample App
+kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com"}'
+
+# Typescript + Stagehand
+kernel invoke ts-stagehand stagehand-task --payload '{"query": "Best wired earbuds"}'
+
+# Python + Sample App
+kernel invoke python-basic get-page-title --payload '{"url": "https://www.google.com"}'
+
+# Python + Browser Use
+kernel invoke python-bu bu-task --payload '{"task": "Compare the price of gpt-4o and DeepSeek-V3"}'
+```
+
+## Sample apps reference
+
+These are the sample apps currently available when you run `npx @onkernel/create-kernel-app`:
+
+| Template | Description | Framework | Query Parameters |
+|----------|-------------|-----------|------------------|
+| **sample-app** | Returns the page title of a specified URL | Playwright | `{ url }` |
+| **browser-use** | Completes a specified task | Browser Use | `{ task }` |
+| **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
 
 ## Documentation
 
