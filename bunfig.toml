@@ -2,10 +2,6 @@
 # Use exact versions for dependencies
 exact = true
 
-[test]
-# Enable TypeScript for tests
-preload = ["./test/setup.ts"]
-
 [debug]
 # Enable source maps for better debugging
 sourcemap = true
