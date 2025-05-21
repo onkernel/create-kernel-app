@@ -43,6 +43,7 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
 
     # Create a browser instance using the context's invocation_id
     kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
     
     async with async_playwright() as playwright:
         browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)

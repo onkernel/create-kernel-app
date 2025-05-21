@@ -11,7 +11,7 @@ interface SearchQueryInput {
 }
 
 interface SearchQueryOutput {
-  output: string;
+  url: string;
 }
 
 app.action<SearchQueryInput, SearchQueryOutput>(
@@ -33,10 +33,14 @@ app.action<SearchQueryInput, SearchQueryOutput>(
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
     });
+    
+    console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
 
     const stagehand = new Stagehand({
       env: "LOCAL",
-      modelName: "gpt-4o",
+      verbose: 1,
+      domSettleTimeoutMs: 30_000,
+      modelName: "openai/gpt-4o",
       modelClientOptions: {
         apiKey: process.env.OPENAI_API_KEY,
       },
@@ -46,18 +50,15 @@ app.action<SearchQueryInput, SearchQueryOutput>(
     });
     await stagehand.init();
     const page = stagehand.page;
-    await page.goto("https://www.google.com");
     await page.act(`Type in ${payload.query} into the search bar`);
-
-    const { output } = await page.extract({
-      instruction: "The url of the first search result",
-      schema: z.object({
-        output: z.string(),
-      }),
+    await page.act("Click the search button");
+    const output = await page.extract({
+      instruction: "Extract the url of the first search result",
+      schema: z.object({ url: z.string() })
     });
 
     await stagehand.close();
     
-    return { output };
+    return output;
   },
 );
