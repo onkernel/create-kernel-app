@@ -11,9 +11,8 @@ app = kernel.App("python-bu")
 
 class TaskInput(TypedDict):
     task: str
-    openai_api_key: str
     
-# LLM API Keys are set in the environment during `kernel deploy <filename> --env OPENAI_API_KEY=XXX`
+# LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
 # See https://docs.onkernel.com/launch/deploy#environment-variables
 llm = ChatOpenAI(model="gpt-4o")
 
@@ -24,7 +23,7 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
     
     Args:
         ctx: Kernel context containing invocation information
-        input_data: An object with task and openai_api_key properties
+        input_data: An object with a BU task
         
     Returns:
         An object with final_result and errors properties
