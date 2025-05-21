@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "browser-use>=0.1.46",
-    "kernel==0.1.0",
+    "kernel==0.2.0",
     "langchain-openai>=0.3.11",
     "pydantic>=2.10.6",
 ]
