@@ -53,9 +53,7 @@ jobs:
             --title "chore: bump version" \
             --body "Automated version bump" \
             --base main \
-            --head $BRANCH_NAME \
-            --label "automated" \
-            --label "version-bump"
+            --head $BRANCH_NAME
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_CLI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
