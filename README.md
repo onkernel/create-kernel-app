@@ -38,6 +38,8 @@ create-kernel-app [app-name] [options]
   - `sample-app`: Basic template with Playwright integration
   - `browser-use`: Template with Browser Use SDK (Python only)
   - `stagehand`: Template with Stagehand SDK (Typescript only)
+  - `persistent-browser`: Implements `sample-app` using a persistent browser 
+  - `computer-use`: Implements a prompt loop using Anthropic Computer Use
 
 ### Examples
 
@@ -51,6 +53,11 @@ Create a Typescript application with Stagehand template:
 npx @onkernel/create-kernel-app my-app --language typescript --template stagehand
 ```
 
+Create a Typescript application with Computer Use template:
+```bash
+npx @onkernel/create-kernel-app my-app --language typescript --template computer-use
+```
+
 Create a Python application with a sample app:
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template sample-app
@@ -59,6 +66,7 @@ npx @onkernel/create-kernel-app my-app --language python --template sample-app
 Create a Python application with Browser Use template:
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template browser-use
+```
 ```
 
 ## Next Steps
@@ -82,7 +90,7 @@ export KERNEL_API_KEY=<YOUR_API_KEY>
 4. Deploy your application:
 ```bash
 # Typscript
-kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand
+kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC_API_KEY=XXX if Computer Use
 
 # Python
 kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
@@ -97,6 +105,9 @@ kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com
 
 # Typescript + Stagehand
 kernel invoke ts-stagehand stagehand-task --payload '{"query": "Best wired earbuds"}'
+
+# Typescript + Computer Use
+kernel invoke ts-cu cu-task --payload '{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}'
 
 # Python + Sample App
 kernel invoke python-basic get-page-title --payload '{"url": "https://www.google.com"}'
@@ -114,6 +125,8 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **sample-app** | Returns the page title of a specified URL | Playwright | `{ url }` |
 | **browser-use** | Completes a specified task | Browser Use | `{ task }` |
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
+| **persistent-browser** | Implements `sample-app` using a persistent browser | Playwright | `{ url }` |
+| **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
 
 ## Documentation
 

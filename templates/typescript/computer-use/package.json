@@ -1,0 +1,13 @@
+{
+    "name": "ts-cu",
+    "module": "index.ts",
+    "type": "module",
+    "private": true,
+    "peerDependencies": {
+      "typescript": "^5"
+    },
+    "dependencies": {
+      "@onkernel/sdk": "0.3.0"
+    }
+  }
+  
