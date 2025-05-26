@@ -39,37 +39,41 @@ app.action<QueryInput, QueryOutput>(
       throw new Error('Error getting initial page');
     }
 
-    // Run the sampling loop
-    const finalMessages = await samplingLoop({
-      model: 'claude-sonnet-4-20250514',
-      messages: [{
-        role: 'user',
-        content: payload.query
-      }],
-      errorResponseCallback,
-      apiKey: process.env.ANTHROPIC_API_KEY || '',
-      playwrightPage: page,
-      cdpUrl: kernelBrowser.cdp_ws_url,
-    });
+    try {
+      // Run the sampling loop
+      const finalMessages = await samplingLoop({
+        model: 'claude-sonnet-4-20250514',
+        messages: [{
+          role: 'user',
+          content: payload.query
+        }],
+        errorResponseCallback,
+        apiKey: process.env.ANTHROPIC_API_KEY || '',
+        playwrightPage: page,
+      });
 
-    await browser.close();
+      // Extract the final result from the messages
+      if (finalMessages.length === 0) {
+        throw new Error('No messages were generated during the sampling loop');
+      }
 
-    // Extract the final result from the messages
-    if (finalMessages.length === 0) {
-      throw new Error('No messages were generated during the sampling loop');
+      const lastMessage = finalMessages[finalMessages.length - 1];
+      if (!lastMessage) {
+        throw new Error('Failed to get the last message from the sampling loop');
+      }
+
+      const result = typeof lastMessage.content === 'string' 
+        ? lastMessage.content 
+        : lastMessage.content.map(block => 
+            block.type === 'text' ? block.text : ''
+          ).join('');
+
+      return { result };
+    } catch (error) {
+      console.error('Error in sampling loop:', error);
+      throw error;
+    } finally {
+      await browser.close();
     }
-
-    const lastMessage = finalMessages[finalMessages.length - 1];
-    if (!lastMessage) {
-      throw new Error('Failed to get the last message from the sampling loop');
-    }
-
-    const result = typeof lastMessage.content === 'string' 
-      ? lastMessage.content 
-      : lastMessage.content.map(block => 
-          block.type === 'text' ? block.text : ''
-        ).join('');
-
-    return { result };
   },
 );
