@@ -116,11 +116,8 @@ class ToolCollection {
 
   toParams(): any[] {
     const params = this.tools.map(tool => {
-      const toolParams = tool.toParams();
-      console.log('Individual tool params:', JSON.stringify(toolParams, null, 2));
-      return toolParams;
+      return tool.toParams();
     });
-    console.log('All tool params:', JSON.stringify(params, null, 2));
     return params;
   }
 
@@ -151,9 +148,7 @@ export async function samplingLoop({
   model,
   systemPromptSuffix,
   messages,
-  outputCallback,
-  toolOutputCallback,
-  apiResponseCallback,
+  errorResponseCallback,
   apiKey,
   onlyNMostRecentImages,
   maxTokens = 4096,
@@ -161,13 +156,12 @@ export async function samplingLoop({
   thinkingBudget,
   tokenEfficientToolsBeta = false,
   playwrightPage,
+  cdpUrl,
 }: {
   model: string;
   systemPromptSuffix?: string;
   messages: BetaMessageParam[];
-  outputCallback: (block: BetaContentBlockParam) => void;
-  toolOutputCallback: (result: ToolResult, id: string) => void;
-  apiResponseCallback: (request: any, response: any, error: any) => void;
+  errorResponseCallback: (request: any, response: any, error: any) => void;
   apiKey: string;
   onlyNMostRecentImages?: number;
   maxTokens?: number;
@@ -175,6 +169,7 @@ export async function samplingLoop({
   thinkingBudget?: number;
   tokenEfficientToolsBeta?: boolean;
   playwrightPage: Page;
+  cdpUrl: string;
 }): Promise<BetaMessageParam[]> {
   const selectedVersion = toolVersion || DEFAULT_TOOL_VERSION;
   const toolGroup = TOOL_GROUPS_BY_VERSION[selectedVersion];
@@ -218,21 +213,9 @@ export async function samplingLoop({
     }
 
     const toolParams = toolCollection.toParams();
-    console.log('=== TOOL AVAILABILITY ===');
-    console.log('Tools being sent to AI:', JSON.stringify(toolParams, null, 2));
-    console.log('Available actions:', Object.values(Action));
-    console.log('=======================');
 
     try {
-      // Use beta API for messages
-      console.log('=== AI REQUEST ===');
-      console.log('Messages being sent:', messages.map(m => ({
-        role: m.role,
-        content: Array.isArray(m.content) 
-          ? m.content.map(c => c.type === 'image' ? 'IMAGE' : c)
-          : m.content
-      })));
-      
+      // Use beta API for messages      
       const response = await client.beta.messages.create({
         max_tokens: maxTokens,
         messages: messages as any,
@@ -243,11 +226,8 @@ export async function samplingLoop({
         ...extraBody,
       });
 
-      console.log('=== AI RESPONSE ===');
-      console.log('Stop reason:', response.stop_reason);
       const responseParams = responseToParams(response as unknown as BetaMessage);
       
-      // Log the AI's response without the full base64 data
       const loggableContent = responseParams.map(block => {
         if (block.type === 'tool_use') {
           return {
@@ -258,17 +238,18 @@ export async function samplingLoop({
         }
         return block;
       });
-      console.log('AI response content:', loggableContent);
+      console.log('=== LLM RESPONSE ===');
+      console.log('Stop reason:', response.stop_reason);
+      console.log(loggableContent);
+      console.log("===")
       
-      // Always add the assistant's response to messages
       messages.push({
         role: 'assistant',
         content: responseParams,
       });
 
-      // Check if the AI has completed its task
       if (response.stop_reason === 'end_turn') {
-        console.log('AI has completed its task, ending loop');
+        console.log('LLM has completed its task, ending loop');
         return messages;
       }
 
@@ -277,10 +258,6 @@ export async function samplingLoop({
       
       for (const contentBlock of responseParams) {
         if (contentBlock.type === 'tool_use' && contentBlock.name && contentBlock.input) {
-          console.log('=== TOOL USE ATTEMPT ===');
-          console.log('Tool:', contentBlock.name);
-          console.log('Action:', contentBlock.input.action);
-          
           hasToolUse = true;
           const toolInput = {
             action: contentBlock.input.action as Action,
@@ -288,35 +265,14 @@ export async function samplingLoop({
           };
           
           try {
-            // Execute tool without logging the full result
             const result = await toolCollection.run(
               contentBlock.name,
               toolInput
             );
-            
-            // Just log the result type and size
-            console.log('Tool execution completed');
-            if (result.base64Image) {
-              console.log('Result contains image of size:', result.base64Image.length);
-            }
-            if (result.output) {
-              console.log('Result contains output:', result.output);
-            }
-            if (result.error) {
-              console.log('Result contains error:', result.error);
-            }
-            
-            // Create and add tool result without logging it
+
             const toolResult = makeApiToolResult(result, contentBlock.id!);
             toolResultContent.push(toolResult);
-            
-            // Call output callback without logging
-            toolOutputCallback(result, contentBlock.id!);
-            
-            console.log('Tool result added to messages');
           } catch (error: unknown) {
-            console.error('=== TOOL EXECUTION ERROR ===');
-            console.error('Error executing tool:', contentBlock.name);
             if (error instanceof Error) {
               console.error('Error message:', error.message);
             }
@@ -325,29 +281,20 @@ export async function samplingLoop({
         }
       }
 
-      // Only end the loop if there are no tool results AND no tool use was attempted
+      // End the loop if there are no tool results AND no tool use was attempted
       if (toolResultContent.length === 0 && !hasToolUse && response.stop_reason !== 'tool_use') {
         console.log('No tool use or results, and not waiting for tool use, ending loop');
         return messages;
       }
 
       if (toolResultContent.length > 0) {
-        console.log('Adding tool results to messages');
         messages.push({
           role: 'user',
           content: toolResultContent,
         });
-        console.log('Tool results added, message count:', messages.length);
       }
-      
-      console.log('=== LOOP CONTINUING ===');
-      console.log('Next API call will have', messages.length, 'messages');
     } catch (error: any) {
-      console.error('=== ERROR IN LOOP ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      apiResponseCallback(error.request, error.response || error.body, error);
+      errorResponseCallback(error.request, error.response || error.body, error);
       return messages;
     }
   }
@@ -448,31 +395,24 @@ function makeApiToolResult(
   result: ToolResult,
   toolUseId: string
 ): BetaToolResultBlockParam {
-  console.log('=== MAKING API TOOL RESULT ===');
-  console.log('Tool use ID:', toolUseId);
-  console.log('Result type:', result.error ? 'error' : 'success');
   
   const toolResultContent: (BetaTextBlockParam | BetaImageBlockParam)[] = [];
   let isError = false;
 
   if (result.error) {
-    console.log('Processing error result');
     isError = true;
     toolResultContent.push({
       type: 'text',
       text: maybePrependSystemToolResult(result, result.error),
     });
   } else {
-    console.log('Processing success result');
     if (result.output) {
-      console.log('Adding output text');
       toolResultContent.push({
         type: 'text',
         text: maybePrependSystemToolResult(result, result.output),
       });
     }
     if (result.base64Image) {
-      console.log('Adding base64 image');
       toolResultContent.push({
         type: 'image',
         source: {
@@ -484,14 +424,12 @@ function makeApiToolResult(
     }
   }
 
-  console.log('Final tool result content types:', toolResultContent.map(c => c.type));
   const finalResult: BetaToolResultBlockParam = {
     type: 'tool_result' as const,
     content: toolResultContent,
     tool_use_id: toolUseId,
     is_error: isError,
   };
-  console.log('=== API TOOL RESULT COMPLETE ===');
   return finalResult;
 }
 

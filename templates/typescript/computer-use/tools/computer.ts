@@ -111,7 +111,7 @@ export class ComputerTool implements BaseAnthropicTool {
     const definedKey = key;  // TypeScript now knows key is defined
     // First check if it's a modifier key
     if (this.isModifierKey(definedKey)) {
-      return this.modifierKeys[definedKey];
+      return this.modifierKeys[definedKey] as string;
     }
     // Then check the regular key map
     return this.keyMap[definedKey] || definedKey;
@@ -134,7 +134,6 @@ export class ComputerTool implements BaseAnthropicTool {
       display_height_px: 720,
       display_number: null,
     };
-    console.log('ComputerTool toParams:', JSON.stringify(params, null, 2));
     return params;
   }
 
@@ -151,30 +150,14 @@ export class ComputerTool implements BaseAnthropicTool {
   async screenshot(): Promise<ToolResult> {
     try {
       console.log('Starting screenshot...');
-      console.log('Waiting for screenshot delay:', this._screenshotDelay * 1000, 'ms');
       await new Promise(resolve => setTimeout(resolve, this._screenshotDelay * 1000));
-      console.log('Screenshot delay complete');
-      
-      console.log('Taking screenshot...');
       const screenshot = await this.page.screenshot({ type: 'png' });
       console.log('Screenshot taken, size:', screenshot.length, 'bytes');
-      
-      console.log('Converting to base64...');
-      const base64 = screenshot.toString('base64');
-      console.log('Base64 conversion complete, length:', base64.length);
-      
-      console.log('Returning screenshot result');
+
       return {
-        base64Image: base64,
+        base64Image: screenshot.toString('base64'),
       };
     } catch (error) {
-      console.error('=== SCREENSHOT ERROR ===');
-      console.error('Error taking screenshot:', error);
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-      }
-      console.error('========================');
       throw new ToolError(`Failed to take screenshot: ${error}`);
     }
   }
@@ -190,7 +173,6 @@ export class ComputerTool implements BaseAnthropicTool {
     key?: string;
     [key: string]: any;
   }): Promise<ToolResult> {
-    console.log('ComputerTool.call called with params:', JSON.stringify(params, null, 2));
     const { 
       action, 
       text, 
@@ -232,9 +214,7 @@ export class ComputerTool implements BaseAnthropicTool {
       if (this.version !== '20250124') {
         throw new ToolError(`${action} is only available in version 20250124`);
       }
-      
-      console.log('Scroll parameters:', { scrollDirection, scrollAmountValue });
-      
+            
       if (!scrollDirection || !['up', 'down', 'left', 'right'].includes(scrollDirection)) {
         throw new ToolError(`Scroll direction "${scrollDirection}" must be 'up', 'down', 'left', or 'right'`);
       }
@@ -244,13 +224,11 @@ export class ComputerTool implements BaseAnthropicTool {
 
       if (coordinate) {
         const [x, y] = this.validateAndGetCoordinates(coordinate);
-        console.log(`Moving mouse to scroll coordinates: [${x}, ${y}]`);
         await this.page.mouse.move(x, y);
         await this.page.waitForTimeout(100);
       }
 
       const amount = scrollAmountValue || 100;
-      console.log(`Scrolling ${scrollDirection} by ${amount} pixels`);
       
       if (scrollDirection === 'down' || scrollDirection === 'up') {
         await this.page.mouse.wheel(0, scrollDirection === 'down' ? amount : -amount);
@@ -300,7 +278,6 @@ export class ComputerTool implements BaseAnthropicTool {
         }
         this.validateDuration(duration, action);
         const key = this.getPlaywrightKey(text!);
-        console.log(`Holding key: ${key}`);
         await this.page.keyboard.down(key);
         await new Promise(resolve => setTimeout(resolve, duration! * 1000));
         await this.page.keyboard.up(key);
@@ -308,7 +285,6 @@ export class ComputerTool implements BaseAnthropicTool {
         // Handle key combinations (e.g., ctrl+a)
         const keyCombo = this.keyCombinations[text!];
         if (keyCombo) {
-          console.log('Pressing key combination:', keyCombo);
           for (const key of keyCombo) {
             await this.page.keyboard.down(this.getPlaywrightKey(key));
           }
@@ -317,7 +293,6 @@ export class ComputerTool implements BaseAnthropicTool {
           }
         } else {
           const key = this.getPlaywrightKey(text!);
-          console.log(`Pressing key: ${key}`);
           if (this.isModifierKey(text!)) {
             // For modifier keys, use down/up instead of press
             await this.page.keyboard.down(key);
@@ -354,7 +329,6 @@ export class ComputerTool implements BaseAnthropicTool {
       }
 
       const [x, y] = this.validateAndGetCoordinates(coordinate);
-      console.log(`Moving mouse to coordinates: [${x}, ${y}]`);
 
       // Move mouse to position first
       await this.page.mouse.move(x, y);

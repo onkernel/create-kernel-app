@@ -15,21 +15,8 @@ interface QueryOutput {
   result: string;
 }
 
-// Anthropic callbacks for handling loop output
-const cuOutputCallback = (block: any) => {
-  console.log('Output block:', block);
-};
-
-const cuToolOutputCallback = (result: ToolResult, id: string) => {
-  console.log('Tool output:', { id, result: Object.keys(result) });
-};
-
-const cuApiResponseCallback = (request: any, response: any, error: any) => {
-  if (error) {
-    console.error('API error:', error);
-  } else {
-    console.log('API response:', { request, response });
-  }
+const errorResponseCallback = (request: any, response: any, error: any) => {
+  console.error('Error response callback - API response:', { request, response, error });
 };
 
 app.action<QueryInput, QueryOutput>(
@@ -59,11 +46,10 @@ app.action<QueryInput, QueryOutput>(
         role: 'user',
         content: payload.query
       }],
-      outputCallback: cuOutputCallback,
-      toolOutputCallback: cuToolOutputCallback,
-      apiResponseCallback: cuApiResponseCallback,
+      errorResponseCallback,
       apiKey: process.env.ANTHROPIC_API_KEY || '',
       playwrightPage: page,
+      cdpUrl: kernelBrowser.cdp_ws_url,
     });
 
     await browser.close();
