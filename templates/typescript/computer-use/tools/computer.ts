@@ -55,6 +55,68 @@ export class ComputerTool implements BaseAnthropicTool {
   protected _screenshotDelay = 2.0;
   protected version: '20241022' | '20250124';
 
+  // Map of common key aliases to Playwright key names
+  private readonly keyMap: Record<string, string> = {
+    'Return': 'Enter',
+    'Enter': 'Enter',
+    'Escape': 'Escape',
+    'Tab': 'Tab',
+    'Backspace': 'Backspace',
+    'Delete': 'Delete',
+    'ArrowUp': 'ArrowUp',
+    'ArrowDown': 'ArrowDown',
+    'ArrowLeft': 'ArrowLeft',
+    'ArrowRight': 'ArrowRight',
+    'Home': 'Home',
+    'End': 'End',
+    'PageUp': 'PageUp',
+    'PageDown': 'PageDown',
+    'Space': ' ',
+    ' ': ' ',
+  };
+
+  // Map of modifier keys to their Playwright equivalents
+  private readonly modifierKeys: Record<string, string> = {
+    'Ctrl': 'Control',
+    'Control': 'Control',
+    'Alt': 'Alt',
+    'Shift': 'Shift',
+    'Meta': 'Meta',
+    'Command': 'Meta',
+    'Win': 'Meta',
+  };
+
+  // Map of key combinations to their components
+  private readonly keyCombinations: Record<string, string[]> = {
+    'ctrl+a': ['Control', 'a'],
+    'ctrl+c': ['Control', 'c'],
+    'ctrl+v': ['Control', 'v'],
+    'ctrl+x': ['Control', 'x'],
+    'ctrl+z': ['Control', 'z'],
+    'ctrl+y': ['Control', 'y'],
+    'ctrl+f': ['Control', 'f'],
+    'alt+tab': ['Alt', 'Tab'],
+    'alt+f4': ['Alt', 'F4'],
+    'alt+enter': ['Alt', 'Enter'],
+  };
+
+  private isModifierKey(key: string | undefined): boolean {
+    return key !== undefined && key in this.modifierKeys;
+  }
+
+  private getPlaywrightKey(key: string | undefined): string {
+    if (!key) {
+      throw new ToolError('Key cannot be undefined');
+    }
+    const definedKey = key;  // TypeScript now knows key is defined
+    // First check if it's a modifier key
+    if (this.isModifierKey(definedKey)) {
+      return this.modifierKeys[definedKey];
+    }
+    // Then check the regular key map
+    return this.keyMap[definedKey] || definedKey;
+  }
+
   constructor(page: Page, version: '20241022' | '20250124' = '20250124') {
     this.page = page;
     this.version = version;
@@ -88,12 +150,31 @@ export class ComputerTool implements BaseAnthropicTool {
 
   async screenshot(): Promise<ToolResult> {
     try {
+      console.log('Starting screenshot...');
+      console.log('Waiting for screenshot delay:', this._screenshotDelay * 1000, 'ms');
       await new Promise(resolve => setTimeout(resolve, this._screenshotDelay * 1000));
+      console.log('Screenshot delay complete');
+      
+      console.log('Taking screenshot...');
       const screenshot = await this.page.screenshot({ type: 'png' });
+      console.log('Screenshot taken, size:', screenshot.length, 'bytes');
+      
+      console.log('Converting to base64...');
+      const base64 = screenshot.toString('base64');
+      console.log('Base64 conversion complete, length:', base64.length);
+      
+      console.log('Returning screenshot result');
       return {
-        base64Image: screenshot.toString('base64'),
+        base64Image: base64,
       };
     } catch (error) {
+      console.error('=== SCREENSHOT ERROR ===');
+      console.error('Error taking screenshot:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      console.error('========================');
       throw new ToolError(`Failed to take screenshot: ${error}`);
     }
   }
@@ -103,13 +184,26 @@ export class ComputerTool implements BaseAnthropicTool {
     text?: string;
     coordinate?: [number, number];
     scrollDirection?: ScrollDirection;
+    scroll_amount?: number;
     scrollAmount?: number;
     duration?: number;
     key?: string;
     [key: string]: any;
   }): Promise<ToolResult> {
     console.log('ComputerTool.call called with params:', JSON.stringify(params, null, 2));
-    const { action, text, coordinate, scrollDirection, scrollAmount, duration, ...kwargs } = params;
+    const { 
+      action, 
+      text, 
+      coordinate, 
+      scrollDirection: scrollDirectionParam,
+      scroll_amount,
+      scrollAmount,
+      duration, 
+      ...kwargs 
+    } = params;
+
+    const scrollDirection = scrollDirectionParam || kwargs.scroll_direction;
+    const scrollAmountValue = scrollAmount || scroll_amount;
 
     if (action === Action.SCREENSHOT) {
       this.validateText(text, false, action);
@@ -138,20 +232,33 @@ export class ComputerTool implements BaseAnthropicTool {
       if (this.version !== '20250124') {
         throw new ToolError(`${action} is only available in version 20250124`);
       }
+      
+      console.log('Scroll parameters:', { scrollDirection, scrollAmountValue });
+      
       if (!scrollDirection || !['up', 'down', 'left', 'right'].includes(scrollDirection)) {
-        throw new ToolError(`${scrollDirection} must be 'up', 'down', 'left', or 'right'`);
+        throw new ToolError(`Scroll direction "${scrollDirection}" must be 'up', 'down', 'left', or 'right'`);
       }
-      if (typeof scrollAmount !== 'number' || scrollAmount < 0) {
-        throw new ToolError(`${scrollAmount} must be a non-negative number`);
+      if (typeof scrollAmountValue !== 'number' || scrollAmountValue < 0) {
+        throw new ToolError(`Scroll amount "${scrollAmountValue}" must be a non-negative number`);
       }
 
       if (coordinate) {
         const [x, y] = this.validateAndGetCoordinates(coordinate);
+        console.log(`Moving mouse to scroll coordinates: [${x}, ${y}]`);
         await this.page.mouse.move(x, y);
+        await this.page.waitForTimeout(100);
       }
 
-      const amount = scrollAmount || 100;
-      await this.page.mouse.wheel(0, scrollDirection === 'down' ? amount : -amount);
+      const amount = scrollAmountValue || 100;
+      console.log(`Scrolling ${scrollDirection} by ${amount} pixels`);
+      
+      if (scrollDirection === 'down' || scrollDirection === 'up') {
+        await this.page.mouse.wheel(0, scrollDirection === 'down' ? amount : -amount);
+      } else {
+        await this.page.mouse.wheel(scrollDirection === 'right' ? amount : -amount, 0);
+      }
+      
+      await this.page.waitForTimeout(500);
       return await this.screenshot();
     }
 
@@ -192,14 +299,40 @@ export class ComputerTool implements BaseAnthropicTool {
           throw new ToolError(`${action} is only available in version 20250124`);
         }
         this.validateDuration(duration, action);
-        await this.page.keyboard.down(text!);
+        const key = this.getPlaywrightKey(text!);
+        console.log(`Holding key: ${key}`);
+        await this.page.keyboard.down(key);
         await new Promise(resolve => setTimeout(resolve, duration! * 1000));
-        await this.page.keyboard.up(text!);
+        await this.page.keyboard.up(key);
       } else if (action === Action.KEY) {
-        await this.page.keyboard.press(text!);
+        // Handle key combinations (e.g., ctrl+a)
+        const keyCombo = this.keyCombinations[text!];
+        if (keyCombo) {
+          console.log('Pressing key combination:', keyCombo);
+          for (const key of keyCombo) {
+            await this.page.keyboard.down(this.getPlaywrightKey(key));
+          }
+          for (const key of keyCombo.reverse()) {
+            await this.page.keyboard.up(this.getPlaywrightKey(key));
+          }
+        } else {
+          const key = this.getPlaywrightKey(text!);
+          console.log(`Pressing key: ${key}`);
+          if (this.isModifierKey(text!)) {
+            // For modifier keys, use down/up instead of press
+            await this.page.keyboard.down(key);
+            await this.page.waitForTimeout(100);
+            await this.page.keyboard.up(key);
+          } else {
+            await this.page.keyboard.press(key);
+          }
+        }
       } else {
+        // For typing, add a small delay between characters
         await this.page.keyboard.type(text!, { delay: TYPING_DELAY_MS });
       }
+      // Add a small delay after keyboard actions
+      await this.page.waitForTimeout(500);
       return await this.screenshot();
     }
 
@@ -215,6 +348,18 @@ export class ComputerTool implements BaseAnthropicTool {
     ].includes(action)) {
       this.validateText(text, false, action);
       this.validateCoordinate(coordinate, false, action);
+
+      if (!coordinate) {
+        throw new ToolError(`coordinate is required for ${action}`);
+      }
+
+      const [x, y] = this.validateAndGetCoordinates(coordinate);
+      console.log(`Moving mouse to coordinates: [${x}, ${y}]`);
+
+      // Move mouse to position first
+      await this.page.mouse.move(x, y);
+      // Add a small delay to ensure the mouse has moved
+      await this.page.waitForTimeout(100);
 
       if (action === Action.LEFT_MOUSE_DOWN || action === Action.LEFT_MOUSE_UP) {
         if (this.version !== '20250124') {
@@ -235,13 +380,16 @@ export class ComputerTool implements BaseAnthropicTool {
         }[action];
 
         if (action === Action.DOUBLE_CLICK) {
-          await this.page.mouse.dblclick(0, 0, { button });
+          await this.page.mouse.dblclick(x, y, { button });
         } else if (action === Action.TRIPLE_CLICK) {
-          await this.page.mouse.click(0, 0, { button, clickCount: 3 });
+          await this.page.mouse.click(x, y, { button, clickCount: 3 });
         } else {
-          await this.page.mouse.click(0, 0, { button });
+          await this.page.mouse.click(x, y, { button });
         }
       }
+
+      // Add a delay after clicking to ensure the action is complete
+      await this.page.waitForTimeout(500);
       return await this.screenshot();
     }
 
@@ -258,6 +406,26 @@ export class ComputerTool implements BaseAnthropicTool {
   }
 
   protected validateCoordinate(coordinate: [number, number] | undefined, allowed: boolean, action: string): void {
+    // For mouse actions, coordinates are required
+    if ([
+      Action.LEFT_CLICK,
+      Action.RIGHT_CLICK,
+      Action.MIDDLE_CLICK,
+      Action.DOUBLE_CLICK,
+      Action.TRIPLE_CLICK,
+      Action.MOUSE_MOVE,
+      Action.LEFT_CLICK_DRAG,
+      Action.LEFT_MOUSE_DOWN,
+      Action.LEFT_MOUSE_UP,
+    ].includes(action as Action)) {
+      if (!coordinate) {
+        throw new ToolError(`coordinate is required for ${action}`);
+      }
+      this.validateAndGetCoordinates(coordinate);
+      return;
+    }
+
+    // For other actions, coordinates are not allowed
     if (!allowed && coordinate !== undefined) {
       throw new ToolError(`coordinate is not accepted for ${action}`);
     }

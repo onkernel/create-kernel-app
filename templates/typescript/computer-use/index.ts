@@ -21,7 +21,7 @@ const cuOutputCallback = (block: any) => {
 };
 
 const cuToolOutputCallback = (result: ToolResult, id: string) => {
-  console.log('Tool output:', { id, result });
+  console.log('Tool output:', { id, result: Object.keys(result) });
 };
 
 const cuApiResponseCallback = (request: any, response: any, error: any) => {
@@ -51,7 +51,6 @@ app.action<QueryInput, QueryOutput>(
     if (!page) {
       throw new Error('Error getting initial page');
     }
-    await page.waitForTimeout(10000);
 
     // Run the sampling loop
     const finalMessages = await samplingLoop({
