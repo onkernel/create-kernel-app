@@ -1,15 +1,44 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { DateTime } from 'luxon';
 import type { ToolResult } from './tools/computer';
-import { Action_20241022, Action_20250124, ComputerTool20241022, ComputerTool20250124 } from './tools/computer';
+import { ComputerTool20241022, ComputerTool20250124, Action } from './tools/computer';
+import type { Page } from 'playwright';
+
+export type ToolVersion = 'computer_use_20250124' | 'computer_use_20241022' | 'computer_use_20250429';
+export type BetaFlag = 'computer-use-2024-10-22' | 'computer-use-2025-01-24' | 'computer-use-2025-04-29';
+
+const DEFAULT_TOOL_VERSION: ToolVersion = 'computer_use_20250124';
+
+interface ToolGroup {
+  readonly version: ToolVersion;
+  readonly tools: (typeof ComputerTool20241022 | typeof ComputerTool20250124)[];
+  readonly beta_flag: BetaFlag | null;
+}
+
+const TOOL_GROUPS: ToolGroup[] = [
+  {
+    version: 'computer_use_20241022',
+    tools: [ComputerTool20241022],
+    beta_flag: 'computer-use-2024-10-22',
+  },
+  {
+    version: 'computer_use_20250124',
+    tools: [ComputerTool20250124],
+    beta_flag: 'computer-use-2025-01-24',
+  },
+  {
+    version: 'computer_use_20250429',
+    tools: [ComputerTool20250124],
+    beta_flag: 'computer-use-2025-01-24',
+  },
+];
+
+const TOOL_GROUPS_BY_VERSION: Record<ToolVersion, ToolGroup> = Object.fromEntries(
+  TOOL_GROUPS.map(group => [group.version, group])
+) as Record<ToolVersion, ToolGroup>;
 
 export enum APIProvider {
   ANTHROPIC = 'anthropic'
-}
-
-export enum ToolVersion {
-  V20241022 = '20241022',
-  V20250124 = '20250124',
 }
 
 export interface BetaMessageParam {
@@ -66,7 +95,7 @@ const PROMPT_CACHING_BETA_FLAG = 'prompt-caching-2024-07-31';
 // System prompt optimized for the environment
 const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 * You are utilising an Ubuntu virtual machine using ${process.arch} architecture with internet access.
-* When you connect to the display, Chromium is already open. Use that browser to complete your tasks.
+* When you connect to the display, CHROMIUM IS ALREADY OPEN. The url bar is not visible but it is there.
 * When viewing a page it can be helpful to zoom out so that you can see everything on the page. Either that, or make sure you scroll down to see everything before deciding something isn't available.
 * When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
 * The current date is ${DateTime.now().toFormat('EEEE, MMMM d, yyyy')}.
@@ -86,10 +115,16 @@ class ToolCollection {
   }
 
   toParams(): any[] {
-    return this.tools.map(tool => tool.toParams());
+    const params = this.tools.map(tool => {
+      const toolParams = tool.toParams();
+      console.log('Individual tool params:', JSON.stringify(toolParams, null, 2));
+      return toolParams;
+    });
+    console.log('All tool params:', JSON.stringify(params, null, 2));
+    return params;
   }
 
-  async run(name: string, toolInput: { action: Action_20241022 | Action_20250124 } & Record<string, any>): Promise<ToolResult> {
+  async run(name: string, toolInput: { action: Action } & Record<string, any>): Promise<ToolResult> {
     const tool = this.tools.find(t => t.name === name);
     if (!tool) {
       throw new Error(`Tool ${name} not found`);
@@ -97,36 +132,23 @@ class ToolCollection {
 
     // Type guard to ensure action matches the tool version
     if (tool instanceof ComputerTool20241022) {
-      if (!Object.values(Action_20241022).includes(toolInput.action as Action_20241022)) {
+      if (!Object.values(Action).includes(toolInput.action)) {
         throw new Error(`Invalid action ${toolInput.action} for tool version 20241022`);
       }
-      return await tool.call(toolInput as { action: Action_20241022 } & Record<string, any>);
+      return await tool.call(toolInput);
     } else if (tool instanceof ComputerTool20250124) {
-      if (!Object.values(Action_20250124).includes(toolInput.action as Action_20250124)) {
+      if (!Object.values(Action).includes(toolInput.action)) {
         throw new Error(`Invalid action ${toolInput.action} for tool version 20250124`);
       }
-      return await tool.call(toolInput as { action: Action_20250124 } & Record<string, any>);
+      return await tool.call(toolInput);
     }
 
     throw new Error(`Unsupported tool version for ${name}`);
   }
 }
 
-// Tool groups by version
-const TOOL_GROUPS_BY_VERSION: Record<ToolVersion, { tools: any[]; beta_flag?: string }> = {
-  [ToolVersion.V20241022]: {
-    tools: [ComputerTool20241022],
-    beta_flag: 'tools-2024-10-22',
-  },
-  [ToolVersion.V20250124]: {
-    tools: [ComputerTool20250124],
-    beta_flag: 'tools-2025-01-24',
-  },
-};
-
 export async function samplingLoop({
   model,
-  provider,
   systemPromptSuffix,
   messages,
   outputCallback,
@@ -138,9 +160,9 @@ export async function samplingLoop({
   toolVersion,
   thinkingBudget,
   tokenEfficientToolsBeta = false,
+  playwrightPage,
 }: {
   model: string;
-  provider: APIProvider;
   systemPromptSuffix?: string;
   messages: BetaMessageParam[];
   outputCallback: (block: BetaContentBlockParam) => void;
@@ -149,12 +171,14 @@ export async function samplingLoop({
   apiKey: string;
   onlyNMostRecentImages?: number;
   maxTokens?: number;
-  toolVersion: ToolVersion;
+  toolVersion?: ToolVersion;
   thinkingBudget?: number;
   tokenEfficientToolsBeta?: boolean;
+  playwrightPage: Page;
 }): Promise<BetaMessageParam[]> {
-  const toolGroup = TOOL_GROUPS_BY_VERSION[toolVersion];
-  const toolCollection = new ToolCollection(...toolGroup.tools.map(Tool => new Tool()));
+  const selectedVersion = toolVersion || DEFAULT_TOOL_VERSION;
+  const toolGroup = TOOL_GROUPS_BY_VERSION[selectedVersion];
+  const toolCollection = new ToolCollection(...toolGroup.tools.map((Tool: typeof ComputerTool20241022 | typeof ComputerTool20250124) => new Tool(playwrightPage)));
   
   const system: BetaTextBlockParam = {
     type: 'text',
@@ -162,7 +186,6 @@ export async function samplingLoop({
   };
 
   while (true) {
-    let enablePromptCaching = false;
     const betas: string[] = toolGroup.beta_flag ? [toolGroup.beta_flag] : [];
     
     if (tokenEfficientToolsBeta) {
@@ -170,15 +193,10 @@ export async function samplingLoop({
     }
 
     let imageTruncationThreshold = onlyNMostRecentImages || 0;
-    let client: Anthropic;
 
-    if (provider === APIProvider.ANTHROPIC) {
-      client = new Anthropic({ apiKey, maxRetries: 4 });
-      enablePromptCaching = true;
-    } else {
-      throw new Error(`Unsupported provider: ${provider}`);
-    }
-
+    const client = new Anthropic({ apiKey, maxRetries: 4 });
+    const enablePromptCaching = true;
+    
     if (enablePromptCaching) {
       betas.push(PROMPT_CACHING_BETA_FLAG);
       injectPromptCaching(messages);
@@ -199,14 +217,17 @@ export async function samplingLoop({
       extraBody.thinking = { type: 'enabled', budget_tokens: thinkingBudget };
     }
 
+    const toolParams = toolCollection.toParams();
+    console.log('Tool parameters being sent to Anthropic:', JSON.stringify(toolParams, null, 2));
+
     try {
       // Use beta API for messages
-      const response = await (client as Anthropic).beta.messages.create({
+      const response = await client.beta.messages.create({
         max_tokens: maxTokens,
         messages: messages as any, // Type assertion needed for beta API
         model,
         system: [system],
-        tools: toolCollection.toParams(),
+        tools: toolParams,
         betas,
         ...extraBody,
       });
@@ -231,7 +252,7 @@ export async function samplingLoop({
         
         if (contentBlock.type === 'tool_use' && contentBlock.name && contentBlock.input) {
           const toolInput = {
-            action: contentBlock.input.action as Action_20241022 | Action_20250124,
+            action: contentBlock.input.action as Action,
             ...contentBlock.input
           };
           

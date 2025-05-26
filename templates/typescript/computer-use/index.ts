@@ -1,7 +1,7 @@
 import { Kernel, type KernelContext } from '@onkernel/sdk';
-import { samplingLoop, APIProvider, ToolVersion } from './loop';
-import type { BetaMessageParam } from './loop';
+import { samplingLoop } from './loop';
 import type { ToolResult } from './tools/computer';
+import { chromium } from 'playwright';
 
 const kernel = new Kernel();
 
@@ -45,23 +45,29 @@ app.action<QueryInput, QueryOutput>(
 
     console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
 
-    // Initialize messages with the user's query
-    const messages: BetaMessageParam[] = [{
-      role: 'user',
-      content: payload.query
-    }];
+    const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
+    const context = await browser.contexts()[0];
+    const page = await context?.pages()[0];
+    if (!page) {
+      throw new Error('Error getting initial page');
+    }
+    await page.waitForTimeout(10000);
 
     // Run the sampling loop
     const finalMessages = await samplingLoop({
-      model: 'claude-3-opus-20240229',
-      provider: APIProvider.ANTHROPIC,
-      messages,
+      model: 'claude-sonnet-4-20250514',
+      messages: [{
+        role: 'user',
+        content: payload.query
+      }],
       outputCallback: cuOutputCallback,
       toolOutputCallback: cuToolOutputCallback,
       apiResponseCallback: cuApiResponseCallback,
       apiKey: process.env.ANTHROPIC_API_KEY || '',
-      toolVersion: ToolVersion.V20250124,
+      playwrightPage: page,
     });
+
+    await browser.close();
 
     // Extract the final result from the messages
     if (finalMessages.length === 0) {
