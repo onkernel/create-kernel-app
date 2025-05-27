@@ -45,10 +45,11 @@ app.action<QueryInput, QueryOutput>(
         model: 'claude-sonnet-4-20250514',
         messages: [{
           role: 'user',
-          content: payload.query
+          content: payload.query,
         }],
         errorResponseCallback,
         apiKey: process.env.ANTHROPIC_API_KEY || '',
+        thinkingBudget: 1024,
         playwrightPage: page,
       });
 
