@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from browser_use import Agent, Browser, BrowserConfig
+from browser_use import Agent, BrowserSession
 import kernel
 from kernel import Kernel
 from typing import TypedDict
@@ -34,7 +34,7 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
         #task="Compare the price of gpt-4o and DeepSeek-V3",
         task=input_data["task"],
         llm=llm,
-        browser=Browser(BrowserConfig(cdp_url=kernel_browser.cdp_ws_url))
+        browser_session=BrowserSession(cdp_url=kernel_browser.cdp_ws_url)
     )
     result = await agent.run()
     if result.final_result() is not None:
