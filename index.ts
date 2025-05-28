@@ -17,7 +17,8 @@ type TemplateKey =
   | "sample-app"
   | "browser-use"
   | "stagehand"
-  | "persistent-browser";
+  | "persistent-browser"
+  | "computer-use";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -32,6 +33,7 @@ const TEMPLATE_SAMPLE_APP = "sample-app";
 const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_PERSISTENT_BROWSER = "persistent-browser";
+const TEMPLATE_COMPUTER_USE = "computer-use";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 
@@ -66,6 +68,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
       "Implements a persistent browser that maintains state across invocations",
     languages: [LANGUAGE_TYPESCRIPT],
   },
+  [TEMPLATE_COMPUTER_USE]: {
+    name: "Computer Use",
+    description: "Implements the Anthropic Computer Use SDK",
+    languages: [LANGUAGE_TYPESCRIPT],
+  },
 };
 
 const INVOKE_SAMPLES: Record<
@@ -79,6 +86,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
     [TEMPLATE_PERSISTENT_BROWSER]:
       'kernel invoke ts-persistent-browser persistent-browser-task --payload \'{"url": "https://news.ycombinator.com/"}\'',
+    [TEMPLATE_COMPUTER_USE]:
+      'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -299,10 +308,12 @@ function printNextSteps(
 ): void {
   // Determine which sample command to show based on language and template
   const deployCommand =
-    language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_SAMPLE_APP
+    language === LANGUAGE_TYPESCRIPT && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_PERSISTENT_BROWSER)
       ? "kernel deploy index.ts"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_STAGEHAND
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
+      : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_COMPUTER_USE
+      ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_SAMPLE_APP
       ? "kernel deploy main.py"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE
@@ -341,7 +352,7 @@ program
   )
   .option(
     "-t, --template <template>",
-    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND})`
+    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_PERSISTENT_BROWSER}, ${TEMPLATE_COMPUTER_USE})`
   )
   .action(
     async (

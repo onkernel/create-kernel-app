@@ -1,4 +1,4 @@
-import type { BetaMessage, BetaMessageParam, BetaToolResultBlock, BetaContentBlock } from '../types/beta';
+import type { BetaMessage, BetaMessageParam, BetaToolResultBlock, BetaContentBlock, BetaLocalContentBlock } from '../types/beta';
 
 export function responseToParams(response: BetaMessage): BetaContentBlock[] {
   return response.content.map(block => {
@@ -63,12 +63,12 @@ export function injectPromptCaching(messages: BetaMessageParam[]): void {
         breakpointsRemaining--;
         const lastContent = message.content[message.content.length - 1];
         if (lastContent) {
-          (lastContent as any).cache_control = { type: 'ephemeral' };
+          (lastContent as BetaLocalContentBlock).cache_control = { type: 'ephemeral' };
         }
       } else {
         const lastContent = message.content[message.content.length - 1];
         if (lastContent) {
-          delete (lastContent as any).cache_control;
+          delete (lastContent as BetaLocalContentBlock).cache_control;
         }
         break;
       }

@@ -40,7 +40,7 @@ export interface ActionParams {
   scrollAmount?: number;
   duration?: Duration;
   key?: string;
-  [key: string]: any;
+  [key: string]: Action | string | Coordinate | ScrollDirection | number | Duration | undefined;
 }
 
 export interface ToolResult {
@@ -53,7 +53,7 @@ export interface ToolResult {
 export interface BaseAnthropicTool {
   name: string;
   apiType: string;
-  toParams(): any;
+  toParams(): ActionParams;
 }
 
 export class ToolError extends Error {

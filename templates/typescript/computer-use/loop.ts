@@ -6,6 +6,8 @@ import { ToolCollection, DEFAULT_TOOL_VERSION, TOOL_GROUPS_BY_VERSION, type Tool
 import { responseToParams, maybeFilterToNMostRecentImages, injectPromptCaching, PROMPT_CACHING_BETA_FLAG } from './utils/message-processing';
 import { makeApiToolResult } from './utils/tool-results';
 import { ComputerTool20241022, ComputerTool20250124 } from './tools/computer';
+import type { ActionParams } from './tools/types/computer';
+import { Action } from './tools/types/computer';
 
 // System prompt optimized for the environment
 const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
@@ -28,11 +30,24 @@ const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 * Instead, click on the search bar on the center of the screen where it says "Search or enter address", and enter the appropriate search term or URL there.
 </IMPORTANT>`;
 
+// Add new type definitions
+interface ThinkingConfig {
+  type: 'enabled';
+  budget_tokens: number;
+}
+
+interface ExtraBodyConfig {
+  thinking?: ThinkingConfig;
+}
+
+interface ToolUseInput extends Record<string, unknown> {
+  action: Action;
+}
+
 export async function samplingLoop({
   model,
   systemPromptSuffix,
   messages,
-  errorResponseCallback,
   apiKey,
   onlyNMostRecentImages,
   maxTokens = 4096,
@@ -44,7 +59,6 @@ export async function samplingLoop({
   model: string;
   systemPromptSuffix?: string;
   messages: BetaMessageParam[];
-  errorResponseCallback: (request: any, response: any, error: any) => void;
   apiKey: string;
   onlyNMostRecentImages?: number;
   maxTokens?: number;
@@ -78,7 +92,7 @@ export async function samplingLoop({
       betas.push(PROMPT_CACHING_BETA_FLAG);
       injectPromptCaching(messages);
       onlyNMostRecentImages = 0;
-      (system as any).cache_control = { type: 'ephemeral' };
+      (system as BetaTextBlock).cache_control = { type: 'ephemeral' };
     }
 
     if (onlyNMostRecentImages) {
@@ -89,60 +103,63 @@ export async function samplingLoop({
       );
     }
 
-    const extraBody: Record<string, any> = {};
+    const extraBody: ExtraBodyConfig = {};
     if (thinkingBudget) {
       extraBody.thinking = { type: 'enabled', budget_tokens: thinkingBudget };
     }
 
     const toolParams = toolCollection.toParams();
 
-    try {
-      const response = await client.beta.messages.create({
-        max_tokens: maxTokens,
-        messages: messages as any,
-        model,
-        system: [system],
-        tools: toolParams,
-        betas,
-        ...extraBody,
-      });
+    const response = await client.beta.messages.create({
+      max_tokens: maxTokens,
+      messages,
+      model,
+      system: [system],
+      tools: toolParams,
+      betas,
+      ...extraBody,
+    });
 
-      const responseParams = responseToParams(response as any);
-      
-      const loggableContent = responseParams.map(block => {
-        if (block.type === 'tool_use') {
-          return {
-            type: 'tool_use',
-            name: block.name,
-            input: block.input
-          };
-        }
-        return block;
-      });
-      console.log('=== LLM RESPONSE ===');
-      console.log('Stop reason:', response.stop_reason);
-      console.log(loggableContent);
-      console.log("===")
-      
-      messages.push({
-        role: 'assistant',
-        content: responseParams,
-      });
-
-      if (response.stop_reason === 'end_turn') {
-        console.log('LLM has completed its task, ending loop');
-        return messages;
+    const responseParams = responseToParams(response);
+    
+    const loggableContent = responseParams.map(block => {
+      if (block.type === 'tool_use') {
+        return {
+          type: 'tool_use',
+          name: block.name,
+          input: block.input
+        };
       }
+      return block;
+    });
+    console.log('=== LLM RESPONSE ===');
+    console.log('Stop reason:', response.stop_reason);
+    console.log(loggableContent);
+    console.log("===")
+    
+    messages.push({
+      role: 'assistant',
+      content: responseParams,
+    });
 
-      const toolResultContent = [];
-      let hasToolUse = false;
-      
-      for (const contentBlock of responseParams) {
-        if (contentBlock.type === 'tool_use' && contentBlock.name && contentBlock.input) {
+    if (response.stop_reason === 'end_turn') {
+      console.log('LLM has completed its task, ending loop');
+      return messages;
+    }
+
+    const toolResultContent = [];
+    let hasToolUse = false;
+    
+    for (const contentBlock of responseParams) {
+      if (contentBlock.type === 'tool_use' && contentBlock.name && contentBlock.input && typeof contentBlock.input === 'object') {
+        const input = contentBlock.input as ToolUseInput;
+        if ('action' in input && typeof input.action === 'string') {
           hasToolUse = true;
-          const toolInput = {
-            action: contentBlock.input.action,
-            ...contentBlock.input
+          const toolInput: ActionParams = {
+            action: input.action as Action,
+            ...Object.fromEntries(
+              Object.entries(input).filter(([key]) => key !== 'action')
+            )
           };
           
           try {
@@ -153,29 +170,24 @@ export async function samplingLoop({
 
             const toolResult = makeApiToolResult(result, contentBlock.id!);
             toolResultContent.push(toolResult);
-          } catch (error: unknown) {
-            if (error instanceof Error) {
-              console.error('Error message:', error.message);
-            }
+          } catch (error) {
+            console.error(error);
             throw error;
           }
         }
       }
+    }
 
-      if (toolResultContent.length === 0 && !hasToolUse && response.stop_reason !== 'tool_use') {
-        console.log('No tool use or results, and not waiting for tool use, ending loop');
-        return messages;
-      }
-
-      if (toolResultContent.length > 0) {
-        messages.push({
-          role: 'user',
-          content: toolResultContent,
-        });
-      }
-    } catch (error: any) {
-      errorResponseCallback(error.request, error.response || error.body, error);
+    if (toolResultContent.length === 0 && !hasToolUse && response.stop_reason !== 'tool_use') {
+      console.log('No tool use or results, and not waiting for tool use, ending loop');
       return messages;
+    }
+
+    if (toolResultContent.length > 0) {
+      messages.push({
+        role: 'user',
+        content: toolResultContent,
+      });
     }
   }
 }

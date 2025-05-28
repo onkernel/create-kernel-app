@@ -14,6 +14,14 @@ interface SearchQueryOutput {
   url: string;
 }
 
+// LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
+// See https://docs.onkernel.com/launch/deploy#environment-variables
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY is not set');
+}
+
 app.action<SearchQueryInput, SearchQueryOutput>(
   'stagehand-task',
   async (ctx: KernelContext, payload?: SearchQueryInput): Promise<SearchQueryOutput> => {
@@ -42,7 +50,7 @@ app.action<SearchQueryInput, SearchQueryOutput>(
       domSettleTimeoutMs: 30_000,
       modelName: "openai/gpt-4o",
       modelClientOptions: {
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: OPENAI_API_KEY,
       },
       localBrowserLaunchOptions: {
         cdpUrl: kernelBrowser.cdp_ws_url,

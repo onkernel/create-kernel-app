@@ -1,7 +1,6 @@
 import { ComputerTool20241022, ComputerTool20250124 } from './computer';
 import { Action } from './types/computer';
-import type { ToolResult } from './types/computer';
-import type { Page } from 'playwright';
+import type { ActionParams, ToolResult } from './types/computer';
 
 export type ToolVersion = 'computer_use_20250124' | 'computer_use_20241022' | 'computer_use_20250429';
 
@@ -43,11 +42,11 @@ export class ToolCollection {
     this.tools = new Map(tools.map(tool => [tool.name, tool]));
   }
 
-  toParams(): any[] {
+  toParams(): ActionParams[] {
     return Array.from(this.tools.values()).map(tool => tool.toParams());
   }
 
-  async run(name: string, toolInput: { action: Action } & Record<string, any>): Promise<ToolResult> {
+  async run(name: string, toolInput: { action: Action } & Record<string, ActionParams>): Promise<ToolResult> {
     const tool = this.tools.get(name);
     if (!tool) {
       throw new Error(`Tool ${name} not found`);

@@ -2,6 +2,7 @@ export class KeyboardUtils {
   // Only map alternative names to standard Playwright modifier keys
   private static readonly modifierKeyMap: Record<string, string> = {
     'ctrl': 'Control',
+    'alt': 'Alt',
     'command': 'Meta',
     'win': 'Meta',
   };
@@ -10,6 +11,18 @@ export class KeyboardUtils {
   private static readonly keyMap: Record<string, string> = {
     'return': 'Enter',
     'space': ' ',
+    'f1': 'F1',
+    'f2': 'F2',
+    'f3': 'F3',
+    'f4': 'F4',
+    'f5': 'F5',
+    'f6': 'F6',
+    'f7': 'F7',
+    'f8': 'F8',
+    'f9': 'F9',
+    'f10': 'F10',
+    'f11': 'F11',
+    'f12': 'F12',
   };
 
   static isModifierKey(key: string | undefined): boolean {

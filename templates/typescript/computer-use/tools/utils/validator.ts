@@ -20,7 +20,7 @@ export class ActionValidator {
     }
   }
 
-  static validateDuration(duration: Duration | undefined, action: string): void {
+  static validateDuration(duration: Duration | undefined): void {
     if (duration === undefined || typeof duration !== 'number') {
       throw new ToolError(`${duration} must be a number`);
     }
@@ -61,7 +61,7 @@ export class ActionValidator {
 
     // Validate duration parameter
     if (action === Action.HOLD_KEY || action === Action.WAIT) {
-      this.validateDuration(duration, action);
+      this.validateDuration(duration);
     }
   }
 } 

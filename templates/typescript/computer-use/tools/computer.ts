@@ -46,7 +46,7 @@ export class ComputerTool implements BaseAnthropicTool {
     return this.version === '20241022' ? 'computer_20241022' : 'computer_20250124';
   }
 
-  toParams(): any {
+  toParams(): ActionParams {
     const params = {
       name: this.name,
       type: this.apiType,
