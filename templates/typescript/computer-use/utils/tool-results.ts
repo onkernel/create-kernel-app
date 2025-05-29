@@ -1,4 +1,4 @@
-import type { ToolResult } from '../tools/computer';
+import type { ToolResult } from '../tools/types/computer';
 import type { BetaToolResultBlock, BetaTextBlock, BetaImageBlock } from '../types/beta';
 
 export function makeApiToolResult(

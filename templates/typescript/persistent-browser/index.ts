@@ -60,6 +60,9 @@ app.action<PageTitleInput, PageTitleOutput>(
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
     try {
+      //////////////////////////////////////
+      // Your browser automation logic here
+      //////////////////////////////////////
       const now = Date.now();
       const contexts = await browser.contexts();
       let context: BrowserContext = contexts[0] ?? (await browser.newContext());

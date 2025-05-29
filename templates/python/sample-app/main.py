@@ -51,6 +51,9 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
         page = await context.new_page()
         
         try:
+            ####################################
+            # Your browser automation logic here
+            ####################################
             await page.goto(url)
             title = await page.title()
             
