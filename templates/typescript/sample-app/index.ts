@@ -16,14 +16,6 @@ interface PageTitleOutput {
 app.action<PageTitleInput, PageTitleOutput>(
   'get-page-title',
   async (ctx: KernelContext, payload?: PageTitleInput): Promise<PageTitleOutput> => {
-    // A function that extracts the title of a webpage
-    
-    // Args:
-    //     ctx: Kernel context containing invocation information
-    //     payload: An object with a URL property
-        
-    // Returns:
-    //     A dictionary containing the page title
     if (!payload?.url) {
       throw new Error('URL is required');
     }
@@ -50,6 +42,9 @@ app.action<PageTitleInput, PageTitleOutput>(
     const page = await context.newPage();
 
     try {
+      //////////////////////////////////////
+      // Your browser automation logic here
+      //////////////////////////////////////
       await page.goto(payload.url);
       const title = await page.title();
       return { title };
