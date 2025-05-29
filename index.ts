@@ -99,6 +99,30 @@ const INVOKE_SAMPLES: Record<
   },
 };
 
+const REGISTERED_APP_NAMES: Record<
+  LanguageKey,
+  Partial<Record<TemplateKey, string>>
+> = {
+  [LANGUAGE_TYPESCRIPT]: {
+    [TEMPLATE_SAMPLE_APP]:
+      'ts-basic',
+    [TEMPLATE_STAGEHAND]:
+      'ts-stagehand',
+    [TEMPLATE_PERSISTENT_BROWSER]:
+      'ts-persistent-browser',
+    [TEMPLATE_COMPUTER_USE]:
+      'ts-cu',
+  },
+  [LANGUAGE_PYTHON]: {
+    [TEMPLATE_SAMPLE_APP]:
+      'python-basic',
+    [TEMPLATE_BROWSER_USE]:
+      'python-bu',
+    [TEMPLATE_PERSISTENT_BROWSER]:
+      'python-persistent-browser',
+  },
+};
+
 const CONFIG = {
   templateBasePath: path.resolve(__dirname, "../templates"),
   defaultAppName: "my-kernel-app",
@@ -326,6 +350,7 @@ function printNextSteps(
 
 Next steps:
   cd ${appName}
+  # Request early access for an API key: https://waitlist.onkernel.com/r/mZW2zz
   export KERNEL_API_KEY=<YOUR_API_KEY>
   ${
     language === LANGUAGE_PYTHON
@@ -334,6 +359,7 @@ Next steps:
   }
   ${deployCommand}
   ${INVOKE_SAMPLES[language][template]}
+  kernel logs ${REGISTERED_APP_NAMES[language][template]} --follow
   `)
   );
 }
