@@ -1,8 +1,10 @@
 # Python
-__pycache__/
-*.py[cod]
-*$py.class
+__init__.py
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
 *.so
+__init__.py.bak
 .Python
 build/
 develop-eggs/
@@ -16,7 +18,7 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
+**/*.egg-info/
 .installed.cfg
 *.egg
 
@@ -24,6 +26,7 @@ wheels/
 venv/
 env/
 ENV/
+.venv/
 
 # IDE
 .idea/

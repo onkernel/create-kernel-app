@@ -1,13 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal, Union, Optional, List, Dict, Any
 from typing import TypedDict
-# from anthropic.types.beta.messages import (
-#     MessageParam as BetaMessageParam,
-#     Message as BetaMessage,
-#     ContentBlock as BetaContentBlock
-# )
-
-# Local types for internal use
 @dataclass
 class BetaTextBlock:
     type: Literal['text']
@@ -61,8 +54,3 @@ class BetaToolResultBlock:
     cache_control: Optional[Dict[Literal['type'], Literal['ephemeral']]] = None
 
 BetaLocalContentBlock = Union[BetaTextBlock, BetaImageBlock, BetaToolUseBlock, BetaThinkingBlock, BetaToolResultBlock]
-
-# Fallback simple aliases when the Anthropic beta types are unavailable.
-BetaMessageParam = Dict[str, Any]
-BetaMessage = Dict[str, Any]
-BetaContentBlock = Dict[str, Any]

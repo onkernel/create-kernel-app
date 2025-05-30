@@ -28,8 +28,12 @@ async def cu_task(
         raise ValueError("Query is required")
 
     browser = None
+    # kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    # print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
+
     try:
         async with async_playwright() as playwright:
+            # browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
             browser = await playwright.chromium.launch(headless=False)
             context_obj = await browser.new_context()
             page = await context_obj.new_page()
