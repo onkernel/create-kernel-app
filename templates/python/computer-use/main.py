@@ -1,10 +1,11 @@
 import os
 from typing import Any, Dict, Optional, TypedDict
+import kernel
+from kernel import Kernel
 
 from playwright.async_api import async_playwright
 
 from loop import sampling_loop
-
 
 class QueryInput(TypedDict):
     query: str
@@ -19,22 +20,26 @@ if not api_key:
     raise ValueError("ANTHROPIC_API_KEY is not set")
 
 
+client = Kernel()
+
+# Create a new Kernel app
+app = kernel.App("python-cu")
+
+@app.action("cu-task")
 async def cu_task(
-    context: Optional[Any] = None,
-    payload: Optional[QueryInput] = None,
+    ctx: kernel.KernelContext,
+    payload: QueryInput,
 ) -> QueryOutput:
-    """Run the computer-use sampling loop with the provided *payload*."""
-    if not payload or not payload.get("query"):
+=    if not payload or not payload.get("query"):
         raise ValueError("Query is required")
 
-    browser = None
-    # kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
-    # print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
+    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
 
     try:
         async with async_playwright() as playwright:
-            # browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
-            browser = await playwright.chromium.launch(headless=False)
+            browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
+            # browser = await playwright.chromium.launch()
             context_obj = await browser.new_context()
             page = await context_obj.new_page()
 
