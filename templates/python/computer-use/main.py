@@ -30,7 +30,7 @@ async def cu_task(
     ctx: kernel.KernelContext,
     payload: QueryInput,
 ) -> QueryOutput:
-=    if not payload or not payload.get("query"):
+    if not payload or not payload.get("query"):
         raise ValueError("Query is required")
 
     kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
@@ -39,9 +39,9 @@ async def cu_task(
     try:
         async with async_playwright() as playwright:
             browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
-            # browser = await playwright.chromium.launch()
-            context_obj = await browser.new_context()
-            page = await context_obj.new_page()
+            # browser = await playwright.chromium.launch(headless=False)
+            context_obj = browser.contexts[0]
+            page = context_obj.pages[0]
 
             # Run the sampling loop
             final_messages = await sampling_loop(

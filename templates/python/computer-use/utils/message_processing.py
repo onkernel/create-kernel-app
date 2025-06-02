@@ -1,4 +1,5 @@
 from typing import List, Dict, Any, Optional, Union, TypedDict, Literal
+from custom_types.beta import BetaMessageParam as BetaMessageParamType
 
 # Type definitions
 class BetaContentBlock(TypedDict, total=False):
@@ -15,7 +16,8 @@ class BetaToolResultBlock(TypedDict):
 class BetaMessage(TypedDict):
     content: List[BetaContentBlock]
 
-BetaMessageParam = Dict[str, Any]
+# Use the dataclass definition from custom_types/beta.py
+BetaMessageParam = BetaMessageParamType
 
 
 def response_to_params(response: BetaMessage) -> List[BetaContentBlock]:

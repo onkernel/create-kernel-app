@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Union, Optional, List, Dict, Any
 from typing import TypedDict
+
 @dataclass
 class BetaTextBlock:
     type: Literal['text']
@@ -53,4 +54,11 @@ class BetaToolResultBlock:
     id: Optional[str] = None
     cache_control: Optional[Dict[Literal['type'], Literal['ephemeral']]] = None
 
+# Define BetaLocalContentBlock before BetaMessageParam
 BetaLocalContentBlock = Union[BetaTextBlock, BetaImageBlock, BetaToolUseBlock, BetaThinkingBlock, BetaToolResultBlock]
+
+@dataclass
+class BetaMessageParam:
+    role: Literal['user', 'assistant']
+    content: List[BetaLocalContentBlock]
+    id: Optional[str] = None
