@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, Optional, TypedDict
-import kernel
-from kernel import Kernel
+# import kernel
+# from kernel import Kernel
 
 from playwright.async_api import async_playwright
 
@@ -20,28 +20,30 @@ if not api_key:
     raise ValueError("ANTHROPIC_API_KEY is not set")
 
 
-client = Kernel()
+# client = Kernel()
 
 # Create a new Kernel app
-app = kernel.App("python-cu")
+# app = kernel.App("python-cu")
 
-@app.action("cu-task")
+# @app.action("cu-task")
 async def cu_task(
-    ctx: kernel.KernelContext,
+    ctx: Any, #kernel.KernelContext,
     payload: QueryInput,
 ) -> QueryOutput:
     if not payload or not payload.get("query"):
         raise ValueError("Query is required")
 
-    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
-    print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
+    # kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    # print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
 
     try:
         async with async_playwright() as playwright:
-            browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
-            # browser = await playwright.chromium.launch(headless=False)
-            context_obj = browser.contexts[0]
-            page = context_obj.pages[0]
+            # browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
+            # context_obj = browser.contexts[0]
+            # page = context_obj.pages[0]
+            browser = await playwright.chromium.launch(headless=False)
+            context_obj = await browser.new_context()
+            page = await context_obj.new_page()
 
             # Run the sampling loop
             final_messages = await sampling_loop(
