@@ -28,6 +28,14 @@ async def cu_task(
     ctx: kernel.KernelContext,
     payload: QueryInput,
 ) -> QueryOutput:
+    # A function that processes a user query using a browser-based sampling loop
+
+    # Args:
+    #     ctx: Kernel context containing invocation information
+    #     payload: An object containing a query string to process
+
+    # Returns:
+    #     A dictionary containing the result of the sampling loop as a string
     if not payload or not payload.get("query"):
         raise ValueError("Query is required")
 
@@ -39,9 +47,6 @@ async def cu_task(
             browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
             context_obj = browser.contexts[0]
             page = context_obj.pages[0]
-            # browser = await playwright.chromium.launch(headless=False)
-            # context_obj = await browser.new_context()
-            # page = await context_obj.new_page()
 
             # Run the sampling loop
             final_messages = await sampling_loop(
