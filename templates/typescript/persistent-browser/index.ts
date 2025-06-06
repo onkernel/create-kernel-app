@@ -51,6 +51,7 @@ app.action<PageTitleInput, PageTitleOutput>(
       persistence: {
         id: "ts-persistent-browser",
       },
+      stealth: true,
     });
 
     console.log(

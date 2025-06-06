@@ -1,5 +1,5 @@
-import { Kernel, type KernelContext } from '@onkernel/sdk';
 import { Stagehand } from "@browserbasehq/stagehand";
+import { Kernel, type KernelContext } from '@onkernel/sdk';
 import { z } from 'zod';
 
 const kernel = new Kernel();
@@ -40,6 +40,7 @@ app.action<SearchQueryInput, SearchQueryOutput>(
 
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
+      stealth: true,
     });
     
     console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
