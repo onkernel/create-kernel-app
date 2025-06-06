@@ -66,12 +66,12 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     name: "Persistent Browser",
     description:
       "Implements a persistent browser that maintains state across invocations",
-    languages: [LANGUAGE_TYPESCRIPT],
+    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
   [TEMPLATE_COMPUTER_USE]: {
     name: "Computer Use",
     description: "Implements the Anthropic Computer Use SDK",
-    languages: [LANGUAGE_TYPESCRIPT],
+    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
 };
 
@@ -96,6 +96,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
     [TEMPLATE_PERSISTENT_BROWSER]:
       'kernel invoke python-persistent-browser persistent-browser-task --payload \'{"url": "https://news.ycombinator.com/"}\'',
+    [TEMPLATE_COMPUTER_USE]:
+      'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
 };
 
@@ -342,6 +344,8 @@ function printNextSteps(
       ? "kernel deploy main.py"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE
       ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
+      : language === LANGUAGE_PYTHON && template === TEMPLATE_COMPUTER_USE
+      ? "kernel deploy main.py --env ANTHROPIC_API_KEY=XXX"
       : "";
 
   console.log(

@@ -28,8 +28,11 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
         An object with final_result and errors properties
     """
     
-    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id, stealth=True)
     print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
+    #######################################
+    # Your Browser Use implementation here
+    #######################################
     agent = Agent(
         #task="Compare the price of gpt-4o and DeepSeek-V3",
         task=input_data["task"],
