@@ -122,6 +122,8 @@ const REGISTERED_APP_NAMES: Record<
       'python-bu',
     [TEMPLATE_PERSISTENT_BROWSER]:
       'python-persistent-browser',
+    [TEMPLATE_COMPUTER_USE]:
+      'python-cu',
   },
 };
 
