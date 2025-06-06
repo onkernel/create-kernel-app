@@ -19,7 +19,6 @@ api_key = os.getenv("ANTHROPIC_API_KEY")
 if not api_key:
     raise ValueError("ANTHROPIC_API_KEY is not set")
 
-
 client = Kernel()
 app = kernel.App("python-cu")
 
@@ -39,7 +38,7 @@ async def cu_task(
     if not payload or not payload.get("query"):
         raise ValueError("Query is required")
 
-    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id)
+    kernel_browser = client.browsers.create(invocation_id=ctx.invocation_id, stealth=True)
     print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
 
     try:
@@ -55,7 +54,7 @@ async def cu_task(
                     "role": "user",
                     "content": payload["query"],
                 }],
-                api_key=api_key,
+                api_key=str(api_key),
                 thinking_budget=1024,
                 playwright_page=page,
             )
