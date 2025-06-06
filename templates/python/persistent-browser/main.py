@@ -54,6 +54,9 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
     async with async_playwright() as playwright:
         browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
         try:
+            ####################################
+            # Your browser automation logic here
+            ####################################
             now = datetime.now()
             context = len(browser.contexts) > 0 and browser.contexts[0] or await browser.new_context()
             page = len(context.pages) > 0 and context.pages[0] or await context.new_page()

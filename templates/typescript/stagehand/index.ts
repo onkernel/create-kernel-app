@@ -58,6 +58,10 @@ app.action<SearchQueryInput, SearchQueryOutput>(
       }
     });
     await stagehand.init();
+
+    /////////////////////////////////////
+    // Your Stagehand implementation here
+    /////////////////////////////////////
     const page = stagehand.page;
     await page.act(`Type in ${payload.query} into the search bar`);
     await page.act("Click the search button");
