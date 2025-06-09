@@ -49,7 +49,7 @@ const LANGUAGES: Record<LanguageKey, LanguageInfo> = {
 const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   [TEMPLATE_SAMPLE_APP]: {
     name: "Sample App",
-    description: "Extracts page title using Playwright",
+    description: "Implements basic Kernel apps",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
   [TEMPLATE_BROWSER_USE]: {
@@ -292,7 +292,20 @@ function copyTemplateFiles(
     throw new Error(`Template not found: ${templatePath}`);
   }
 
-  fs.copySync(templatePath, appPath);
+  // Copy all files and handle _gitignore specially
+  fs.copySync(templatePath, appPath, {
+    filter: (src, dest) => {
+      const filename = path.basename(src);
+      if (filename === '_gitignore') {
+        console.log("Copying _gitignore");
+        fs.copyFileSync(src, dest);
+        // Rename it to .gitignore
+        fs.renameSync(dest, path.join(path.dirname(dest), '.gitignore'));
+        return false; // Skip the original copy since we handled it
+      }
+      return true; // Copy all other files normally
+    }
+  });
 }
 
 // Set up project dependencies based on language
