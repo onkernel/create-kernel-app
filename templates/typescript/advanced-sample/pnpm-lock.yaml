@@ -8,15 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@anthropic-ai/sdk':
-        specifier: 0.52.0
-        version: 0.52.0
       '@onkernel/sdk':
         specifier: '>=0.5.0'
         version: 0.5.0
-      luxon:
-        specifier: 3.6.0
-        version: 3.6.0
       playwright:
         specifier: ^1.52.0
         version: 1.52.0
@@ -26,10 +20,6 @@ importers:
 
 packages:
 
-  '@anthropic-ai/sdk@0.52.0':
-    resolution: {integrity: sha512-d4c+fg+xy9e46c8+YnrrgIQR45CZlAi7PwdzIfDXDM6ACxEZli1/fxhURsq30ZpMZy6LvSkr41jGq5aF5TD7rQ==}
-    hasBin: true
-
   '@onkernel/sdk@0.5.0':
     resolution: {integrity: sha512-n7gwc7rU0GY/XcDnEV0piHPd76bHTSfuTjQW4qFKUWQji0UK9YUVKDFklqAWbyGlXPUezWCfxh79ELv2cFYOBA==}
 
@@ -37,10 +27,6 @@ packages:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
-
-  luxon@3.6.0:
-    resolution: {integrity: sha512-WE7p0p7W1xji9qxkLYsvcIxZyfP48GuFrWIBQZIsbjCyf65dG1rv4n83HcOyEyhvzxJCrUoObCRNFgRNIQ5KNA==}
-    engines: {node: '>=12'}
 
   playwright-core@1.52.0:
     resolution: {integrity: sha512-l2osTgLXSMeuLZOML9qYODUQoPPnUsKsb5/P6LJ2e6uPKXUdPK5WYhN4z03G+YNbWmGDY4YENauNu4ZKczreHg==}
@@ -59,14 +45,10 @@ packages:
 
 snapshots:
 
-  '@anthropic-ai/sdk@0.52.0': {}
-
   '@onkernel/sdk@0.5.0': {}
 
   fsevents@2.3.2:
     optional: true
-
-  luxon@3.6.0: {}
 
   playwright-core@1.52.0: {}
 
