@@ -31,6 +31,7 @@ app.action<QueryInput, QueryOutput>(
 
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
+      stealth: true,
     });
 
     console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
