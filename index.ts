@@ -17,7 +17,7 @@ type TemplateKey =
   | "sample-app"
   | "browser-use"
   | "stagehand"
-  | "persistent-browser"
+  | "advanced-sample"
   | "computer-use";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
@@ -32,7 +32,7 @@ const LANGUAGE_PYTHON = "python";
 const TEMPLATE_SAMPLE_APP = "sample-app";
 const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
-const TEMPLATE_PERSISTENT_BROWSER = "persistent-browser";
+const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
@@ -62,7 +62,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements the Stagehand SDK",
     languages: [LANGUAGE_TYPESCRIPT],
   },
-  [TEMPLATE_PERSISTENT_BROWSER]: {
+  [TEMPLATE_ADVANCED_SAMPLE]: {
     name: "Persistent Browser",
     description:
       "Implements a persistent browser that maintains state across invocations",
@@ -84,8 +84,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
     [TEMPLATE_STAGEHAND]:
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
-    [TEMPLATE_PERSISTENT_BROWSER]:
-      'kernel invoke ts-persistent-browser persistent-browser-task --payload \'{"url": "https://news.ycombinator.com/"}\'',
+    [TEMPLATE_ADVANCED_SAMPLE]:
+      'kernel invoke ts-advanced create-persistent-browser',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
@@ -94,8 +94,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke python-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
     [TEMPLATE_BROWSER_USE]:
       'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
-    [TEMPLATE_PERSISTENT_BROWSER]:
-      'kernel invoke python-persistent-browser persistent-browser-task --payload \'{"url": "https://news.ycombinator.com/"}\'',
+    [TEMPLATE_ADVANCED_SAMPLE]:
+      'kernel invoke python-advanced create-persistent-browser',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
@@ -110,8 +110,8 @@ const REGISTERED_APP_NAMES: Record<
       'ts-basic',
     [TEMPLATE_STAGEHAND]:
       'ts-stagehand',
-    [TEMPLATE_PERSISTENT_BROWSER]:
-      'ts-persistent-browser',
+    [TEMPLATE_ADVANCED_SAMPLE]:
+      'ts-advanced',
     [TEMPLATE_COMPUTER_USE]:
       'ts-cu',
   },
@@ -120,8 +120,8 @@ const REGISTERED_APP_NAMES: Record<
       'python-basic',
     [TEMPLATE_BROWSER_USE]:
       'python-bu',
-    [TEMPLATE_PERSISTENT_BROWSER]:
-      'python-persistent-browser',
+    [TEMPLATE_ADVANCED_SAMPLE]:
+      'python-advanced',
     [TEMPLATE_COMPUTER_USE]:
       'python-cu',
   },
@@ -336,7 +336,7 @@ function printNextSteps(
 ): void {
   // Determine which sample command to show based on language and template
   const deployCommand =
-    language === LANGUAGE_TYPESCRIPT && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_PERSISTENT_BROWSER)
+    language === LANGUAGE_TYPESCRIPT && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
       ? "kernel deploy index.ts"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_STAGEHAND
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
@@ -384,7 +384,7 @@ program
   )
   .option(
     "-t, --template <template>",
-    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_PERSISTENT_BROWSER}, ${TEMPLATE_COMPUTER_USE})`
+    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE})`
   )
   .action(
     async (

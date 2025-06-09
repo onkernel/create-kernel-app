@@ -46,8 +46,8 @@ app.action<PageTitleInput, PageTitleOutput>(
     console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const context = await browser.contexts()[0] || (await browser.newContext());
+    const page = await context.pages()[0] || (await context.newPage());
 
     try {
       //////////////////////////////////////

@@ -8,7 +8,7 @@ from datetime import datetime
 client = Kernel()
 
 # Create a new Kernel app
-app = kernel.App("python-persistent-browser")
+app = kernel.App("python-advanced")
 
 class PageTitleInput(TypedDict):
     url: str
@@ -46,7 +46,7 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
     # Create a browser instance using the context's invocation_id and a persistent id
     kernel_browser = client.browsers.create(
         invocation_id=ctx.invocation_id, 
-        persistence={"id": "my-awesome-persistent-browser-2"},
+        persistence={"id": "my-awesome-advanced-sample-2"},
         stealth=True,
     )
     print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
