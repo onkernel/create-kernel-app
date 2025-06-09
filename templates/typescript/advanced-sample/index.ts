@@ -46,56 +46,6 @@ app.action("test-captcha-solver", async(ctx: KernelContext): Promise<void> => {
   await browser.close();
 });
 
-/** Human in the loop example
- * We'll automate a grocery shopping task using Playwright,
- * then pass the browser to the user to complete the checkout.
- * 
- * 1. Navigate to a grocery store website
- * 2. Auto-fill a shopping cart
- * 3. Provide the live view url to the user to complete the checkout
- * 
- * Args:
- *     ctx: Kernel context containing invocation information
- * Returns:
- *     A dictionary containing the browser live view url
- * 
- * Invoke this via CLI:
- *  export KERNEL_API_KEY=<your_api_key>
- *  kernel deploy index.ts # If you haven't already deployed this app
- *  kernel invoke ts-advanced human-in-the-loop-sample
- *  kernel logs ts-advanced -f # Open in separate tab
- */
-app.action("human-in-the-loop-sample", async (ctx: KernelContext): Promise<{ browser_live_view_url: string }> => {
-  const kernelBrowser = await kernel.browsers.create({
-    invocation_id: ctx.invocation_id,
-    persistence: {
-      id: "hitl-browser",
-    },
-  });
-  const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
-  const context = await browser.contexts()[0] || (await browser.newContext());
-  const page = await context.pages()[0] || (await context.newPage());
-
-  // Navigate to the grocery store website
-  await page.goto("https://www.goodeggs.com/search?q=salmon");
-  await page.waitForTimeout(5000);
-  // Click on the first product available
-  await page.click('.product-tile:first-child');
-  await page.waitForTimeout(3000);
-  // Add salmon to the cart
-  // Select two to meet the minimum order requirement
-  await page.selectOption('select[data-testid="choice-select__select"]', '2');
-  await page.waitForTimeout(3000);
-  await page.click('button.btn.primary.save');
-  await page.waitForTimeout(5000);
-  // Go to the car
-  await page.goto("https://www.goodeggs.com/basket");
-  // Return the live view url so it can be presented to the user to complete the checkot
-  return {
-    browser_live_view_url: kernelBrowser.browser_live_view_url,
-  }
-});
-
 /** Auth example
  * Implements Anthropic Computer Use to to perform a task on behalf of the user 
  * with their credentials. This example automatically logs in with the provided credentials.
