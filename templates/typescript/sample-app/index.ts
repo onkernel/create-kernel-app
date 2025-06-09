@@ -5,6 +5,19 @@ const kernel = new Kernel();
 
 const app = kernel.app('ts-basic');
 
+/**
+ * Example app that extracts the title of a webpage
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ *     payload: An object with a URL property
+ * Returns:
+ *     A dictionary containing the page title
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts # If you haven't already deployed this app
+ *  kernel invoke ts-basic get-page-title -p '{"url": "https://www.google.com"}'
+ *  kernel logs ts-basic -f # Open in separate tab
+ */
 interface PageTitleInput {
   url: string;
 }
@@ -12,18 +25,9 @@ interface PageTitleInput {
 interface PageTitleOutput {
   title: string;
 }
-
 app.action<PageTitleInput, PageTitleOutput>(
   'get-page-title',
   async (ctx: KernelContext, payload?: PageTitleInput): Promise<PageTitleOutput> => {
-    // A function that extracts the title of a webpage
-
-    // Args:
-    //     ctx: Kernel context containing invocation information
-    //     payload: An object with a URL property
-
-    // Returns:
-    //     A dictionary containing the page title
     if (!payload?.url) {
       throw new Error('URL is required');
     }
@@ -46,8 +50,8 @@ app.action<PageTitleInput, PageTitleOutput>(
     console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
-    const context = await browser.newContext();
-    const page = await context.newPage();
+    const context = await browser.contexts()[0] || (await browser.newContext());
+    const page = await context.pages()[0] || (await context.newPage());
 
     try {
       //////////////////////////////////////
@@ -60,4 +64,38 @@ app.action<PageTitleInput, PageTitleOutput>(
       await browser.close();
     }
   },
+);
+
+/**
+ * Example app that instantiates a persisted Kernel browser that can be reused across invocations
+ * Invoke this action to test Kernel browsers manually with our browser live view
+ * https://docs.onkernel.com/launch/browser-persistence
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ * Returns:
+ *     A dictionary containing the browser live view url
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts # If you haven't already deployed this app
+ *  kernel invoke ts-basic create-persisted-browser
+ *  kernel logs ts-basic -f # Open in separate tab
+ */
+interface CreatePersistedBrowserOutput {
+  browser_live_view_url: string;
+}
+app.action("create-persisted-browser",
+  async (ctx: KernelContext): Promise<CreatePersistedBrowserOutput> => {
+
+    const kernelBrowser = await kernel.browsers.create({
+      invocation_id: ctx.invocation_id,
+      persistence: {
+        id: "persisted-browser",
+      },
+      stealth: true, // Turns on residential proxy & auto-CAPTCHA solver
+    });
+
+    return {
+      browser_live_view_url: kernelBrowser.browser_live_view_url,
+    };
+  }
 );

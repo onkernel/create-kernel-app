@@ -38,7 +38,7 @@ create-kernel-app [app-name] [options]
   - `sample-app`: Basic template with Playwright integration
   - `browser-use`: Template with Browser Use SDK (Python only)
   - `stagehand`: Template with Stagehand SDK (Typescript only)
-  - `persistent-browser`: Implements `sample-app` using a persistent browser 
+  - `advanced-sample`: Implements sample apps using advanced Kernel configs
   - `computer-use`: Implements a prompt loop using Anthropic Computer Use
 
 ### Examples
@@ -125,7 +125,7 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **sample-app** | Returns the page title of a specified URL | Playwright | `{ url }` |
 | **browser-use** | Completes a specified task | Browser Use | `{ task }` |
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
-| **persistent-browser** | Implements `sample-app` using a persistent browser | Playwright | `{ url }` |
+| **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
 | **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
 
 ## Documentation

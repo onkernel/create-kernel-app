@@ -110,17 +110,18 @@ wheels = [
 
 [[package]]
 name = "httpx"
-version = "0.28.1"
+version = "0.27.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "certifi" },
     { name = "httpcore" },
     { name = "idna" },
+    { name = "sniffio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406 }
+sdist = { url = "https://files.pythonhosted.org/packages/78/82/08f8c936781f67d9e6b9eeb8a0c8b4e406136ea4c3d1f89a5db71d42e0e6/httpx-0.27.2.tar.gz", hash = "sha256:f7c2be1d2f3c3c3160d441802406b206c2b76f5947b11115e6df10c6c65e66c2", size = 144189 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517 },
+    { url = "https://files.pythonhosted.org/packages/56/95/9377bcb415797e44274b51d46e3249eba641711cf3348050f76ee7b15ffc/httpx-0.27.2-py3-none-any.whl", hash = "sha256:7bb2708e112d8fdd7829cd4243970f0c223274051cb35ee80c03301ee29a3df0", size = 76395 },
 ]
 
 [[package]]
@@ -134,7 +135,7 @@ wheels = [
 
 [[package]]
 name = "kernel"
-version = "0.3.0"
+version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -144,10 +145,33 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f1/e2/2515aeed52d12429db04c451c6eb2bd7bea67aad7e4593f2f551dbaec166/kernel-0.3.0.tar.gz", hash = "sha256:8203ef1a046b9d04973b1a80957a40dc2a6df3e093e4c7cb67e77a453be3edeb", size = 98063 }
+sdist = { url = "https://files.pythonhosted.org/packages/43/e4/e41de86678fc2e888adb8b9e3dc541833651e70f3d586f2d04a8643a4522/kernel-0.5.0.tar.gz", hash = "sha256:2c088a4c36048114d8671d96b21d282145d17d95b94f8ecf9c47b90c2058dd6d", size = 103150 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/c4/ee591dd0e0c3f280cb6763e5a9bd643fb611d6b8f7951d0b3aebb462137e/kernel-0.3.0-py3-none-any.whl", hash = "sha256:30ed748a1097dea2606d43b09ae4989ae3b6869219d18c069838ef5ff0d29f27", size = 86219 },
+    { url = "https://files.pythonhosted.org/packages/0e/72/e5549268462122950ffab9c0d7234199f7a799680b6e9b29eb407a5b5a54/kernel-0.5.0-py3-none-any.whl", hash = "sha256:0de429b686397185644bd6dda0c4bdf3d2bebb1b9fcd0407fcd299002d6011b8", size = 88114 },
 ]
+
+[[package]]
+name = "kernel-python-advanced"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "kernel" },
+    { name = "playwright" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "kernel", specifier = ">=0.5.0" },
+    { name = "playwright", specifier = ">=1.52.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "mypy", specifier = ">=1.15.0" }]
 
 [[package]]
 name = "mypy"
@@ -210,7 +234,7 @@ wheels = [
 
 [[package]]
 name = "pydantic"
-version = "2.11.4"
+version = "2.11.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-types" },
@@ -218,9 +242,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "typing-inspection" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/ab/5250d56ad03884ab5efd07f734203943c8a8ab40d551e208af81d0257bf2/pydantic-2.11.4.tar.gz", hash = "sha256:32738d19d63a226a52eed76645a98ee07c1f410ee41d93b4afbfa85ed8111c2d", size = 786540 }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/86/8ce9040065e8f924d642c58e4a344e33163a07f6b57f836d0d734e0ad3fb/pydantic-2.11.5.tar.gz", hash = "sha256:7f853db3d0ce78ce8bbb148c401c2cdd6431b3473c0cdff2755c7690952a7b7a", size = 787102 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e7/12/46b65f3534d099349e38ef6ec98b1a5a81f42536d17e0ba382c28c67ba67/pydantic-2.11.4-py3-none-any.whl", hash = "sha256:d9615eaa9ac5a063471da949c8fc16376a84afb5024688b3ff885693506764eb", size = 443900 },
+    { url = "https://files.pythonhosted.org/packages/b5/69/831ed22b38ff9b4b64b66569f0e5b7b97cf3638346eb95a2147fdb49ad5f/pydantic-2.11.5-py3-none-any.whl", hash = "sha256:f9c26ba06f9747749ca1e5c94d6a85cb84254577553c8785576fd38fa64dc0f7", size = 444229 },
 ]
 
 [[package]]
@@ -299,29 +323,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/95/03/1fd98d5841cd7964a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9b/4d/b9add7c84060d4c1906abe9a7e5359f2a60f7a9a4f67268b2766673427d8/pyee-13.0.0-py3-none-any.whl", hash = "sha256:48195a3cddb3b1515ce0695ed76036b5ccc2ef3a9f963ff9f77aec0139845498", size = 15730 },
 ]
-
-[[package]]
-name = "python-basic"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "kernel" },
-    { name = "playwright" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "kernel", specifier = "==0.3.0" },
-    { name = "playwright", specifier = ">=1.52.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "mypy", specifier = ">=1.15.0" }]
 
 [[package]]
 name = "sniffio"
