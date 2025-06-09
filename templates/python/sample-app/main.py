@@ -9,6 +9,19 @@ client = Kernel()
 # Create a new Kernel app
 app = kernel.App("python-basic")
 
+"""
+Example app that extracts the title of a webpage
+Args:
+    ctx: Kernel context containing invocation information
+    payload: An object with a URL property
+Returns:
+    A dictionary containing the page title
+Invoke this via CLI:
+    export KERNEL_API_KEY=<your_api_key>
+    kernel deploy main.py # If you haven't already deployed this app
+    kernel invoke python-basic get-page-title -p '{"url": "https://www.google.com"}'
+    kernel logs python-basic -f # Open in separate tab
+"""
 class PageTitleInput(TypedDict):
     url: str
 
@@ -17,16 +30,6 @@ class PageTitleOutput(TypedDict):
 
 @app.action("get-page-title")
 async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) -> PageTitleOutput:
-    """
-    A function that extracts the title of a webpage
-    
-    Args:
-        ctx: Kernel context containing invocation information
-        input_data: An object with a URL property
-        
-    Returns:
-        A dictionary containing the page title
-    """
     url = input_data.get("url")
     if not url or not isinstance(url, str):
         raise ValueError("URL is required and must be a string")
@@ -60,3 +63,33 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
             return {"title": title}
         finally:
             await browser.close()
+
+
+"""
+Example app that instantiates a persisted Kernel browser that can be reused across invocations
+Invoke this action to test Kernel browsers manually with our browser live view
+https://docs.onkernel.com/launch/browser-persistence
+Args:
+    ctx: Kernel context containing invocation information
+Returns:
+    A dictionary containing the browser live view url
+Invoke this via CLI:
+    export KERNEL_API_KEY=<your_api_key>
+    kernel deploy main.py # If you haven't already deployed this app
+    kernel invoke python-basic create-persisted-browser
+    kernel logs python-basic -f # Open in separate tab
+"""
+class CreatePersistedBrowserOutput(TypedDict):
+    browser_live_view_url: str
+
+@app.action("create-persisted-browser")
+async def create_persisted_browser(ctx: kernel.KernelContext) -> CreatePersistedBrowserOutput:
+    kernel_browser = client.browsers.create(
+        invocation_id=ctx.invocation_id,
+        persistence={"id": "persisted-browser"},
+        stealth=True, # Turns on residential proxy & auto-CAPTCHA solver
+    )
+
+    return {
+      "browser_live_view_url": kernel_browser.browser_live_view_url,
+    }

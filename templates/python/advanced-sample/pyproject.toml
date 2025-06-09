@@ -1,10 +1,13 @@
 [project]
-name = "Kernel - Python Advanced Sample App"
+name = "kernel-python-advanced"
 version = "0.1.0"
-description = "Sample application implements advanced Kernel configs"
+description = "Sample application implementing advanced Kernel configs"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["kernel>=0.5.0", "playwright>=1.52.0"]
+dependencies = [
+    "kernel>=0.5.0",
+    "playwright>=1.52.0"
+]
 
 [dependency-groups]
 dev = ["mypy>=1.15.0"]

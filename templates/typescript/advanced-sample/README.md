@@ -1,5 +1,3 @@
-# Kernel Typscript Persistent Browser Example
+# Kernel Typescript Advanced Sample App
 
-This is a simple Kernel application that extracts the title from a webpage, but uses a persistent browser to avoid navigations on subsequent invocations.
-
-See the [docs](https://docs.onkernel.com/quickstart) for information.
+This is a collection of Kernel actions that demonstrate how to use the Kernel SDK.

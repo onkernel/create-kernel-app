@@ -1,77 +1,54 @@
 import kernel
 from kernel import Kernel
 from playwright.async_api import async_playwright
-from typing import TypedDict
-from urllib.parse import urlparse
-from datetime import datetime
 
 client = Kernel()
-
-# Create a new Kernel app
 app = kernel.App("python-advanced")
 
-class PageTitleInput(TypedDict):
-    url: str
+"""
+Example showing Kernel's auto-CAPTCHA solver.
+Visit the live view url to see the Kernel browser auto-solve the CAPTCHA on the site.
 
-class PageTitleOutput(TypedDict):
-    title: str
-    elapsed_ms: float
-
-@app.action("get-page-title")
-async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) -> PageTitleOutput:
-    """
-    A function that extracts the title of a webpage
+Args:
+    ctx: Kernel context containing invocation information
+Returns:
+    None
     
-    Args:
-        ctx: Kernel context containing invocation information
-        input_data: An object with a URL property
-        
-    Returns:
-        A dictionary containing the page title
-    """
-    url = input_data.get("url")
-    if not url or not isinstance(url, str):
-        raise ValueError("URL is required and must be a string")
-
-    # Add https:// if no protocol is present
-    if not url.startswith(('http://', 'https://')):
-        url = f"https://{url}"
-
-    # Validate the URL
-    try:
-        urlparse(url)
-    except Exception:
-        raise ValueError(f"Invalid URL: {url}")
-
-    # Create a browser instance using the context's invocation_id and a persistent id
+Invoke this via CLI:
+    export KERNEL_API_KEY=<your_api_key>
+    kernel deploy main.py  # If you haven't already deployed this app
+    kernel invoke py-advanced test_captcha_solver
+    kernel logs py-advanced -f  # Open in separate tab
+"""
+@app.action("test-captcha-solver")
+async def test_captcha_solver(ctx: kernel.KernelContext) -> None:
     kernel_browser = client.browsers.create(
-        invocation_id=ctx.invocation_id, 
-        persistence={"id": "my-awesome-advanced-sample-2"},
+        invocation_id=ctx.invocation_id,
         stealth=True,
+        persistence={"id": "captcha-solver"}
     )
-    print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
     
     async with async_playwright() as playwright:
         browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
+        
+        # Get or create context and page
+        contexts = browser.contexts
+        context = contexts[0] if contexts else await browser.new_context()
+        pages = context.pages
+        page = pages[0] if pages else await context.new_page()
+        
+        # Access the live view. Retrieve this live_view_url from the Kernel logs in your CLI:
+        # export KERNEL_API_KEY=<Your API key>
+        # kernel logs py-advanced --follow
+        print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
+        
+        # Navigate to a site with a CAPTCHA
         try:
-            ####################################
-            # Your browser automation logic here
-            ####################################
-            now = datetime.now()
-            context = len(browser.contexts) > 0 and browser.contexts[0] or await browser.new_context()
-            page = len(context.pages) > 0 and context.pages[0] or await context.new_page()
-            current_url = page.url
-            print("Current url: ", current_url)
-            if current_url != url:
-                print("Not at url, navigating to it")
-                await page.goto(url)
-            else:
-                print("Already at url, skipping navigation")
-                # for some reason going straight to page.title() leads to an error: Page.title: Execution context was destroyed, most likely because of a navigation
-                # calling bring_to_front() seems to fix it :shrug:
-                await page.bring_to_front() 
-            title = await page.title()
-            elapsedMilliseconds = (datetime.now() - now).total_seconds() * 1000
-            return {"title": title, "elapsed_ms": elapsedMilliseconds}
-        finally:
-            await browser.close()
+            await page.wait_for_timeout(10000)  # Add a delay to give you time to visit the live view url
+            await page.goto("https://www.google.com/recaptcha/api2/demo")
+        except Exception as e:
+            print(f"Error during navigation: {e}")
+            raise
+        # Watch Kernel auto-solve the CAPTCHA!
+        await browser.close()
+

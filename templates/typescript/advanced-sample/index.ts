@@ -7,36 +7,28 @@ const kernel = new Kernel();
 const app = kernel.app("ts-advanced");
 
 /**
- * Example app thatnstantiates a persisted Kernel browser that can be reused across invocations
- * Use this to test Kernel browsers manually with our browser live view
- * https://docs.onkernel.com/launch/browser-persistence
- */
-app.action("create-persisted-browser",
-  async (ctx: KernelContext): Promise<{ browser_live_view_url: string }> => {
-
-    const kernelBrowser = await kernel.browsers.create({
-      invocation_id: ctx.invocation_id,
-      persistence: {
-        id: "persisted-browser",
-      },
-      stealth: true, // Turns on residential proxy & auto-CAPTCHA solver
-    });
-
-    return {
-      browser_live_view_url: kernelBrowser.browser_live_view_url,
-    };
-  }
-);
-
-/**
  * Example showing Kernel's auto-CAPTCHA solver
  * Visit the live view url to see the Kernel browser auto-solve the CAPTCHA on the site
+ * 
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ * Returns:
+ *     None
+ * 
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts # If you haven't already deployed this app
+ *  kernel invoke ts-advanced test-captcha-solver
+ *  kernel logs ts-advanced -f # Open in separate tab
  */
 app.action("test-captcha-solver", async(ctx: KernelContext): Promise<void> => {
 
   const kernelBrowser = await kernel.browsers.create({
     invocation_id: ctx.invocation_id,
     stealth: true,
+    persistence: {
+      id: "captcha-solver",
+    },
   });
   const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
 
@@ -50,9 +42,8 @@ app.action("test-captcha-solver", async(ctx: KernelContext): Promise<void> => {
   const page = await context.pages()[0] || (await context.newPage());
   await page.waitForTimeout(10000); // Add a delay to give you time to visit the live view url
   await page.goto("https://www.google.com/recaptcha/api2/demo");
-
-
   // Watch Kernel auto-solve the CAPTCHA!
+  await browser.close();
 });
 
 /** Human in the loop example
@@ -62,6 +53,17 @@ app.action("test-captcha-solver", async(ctx: KernelContext): Promise<void> => {
  * 1. Navigate to a grocery store website
  * 2. Auto-fill a shopping cart
  * 3. Provide the live view url to the user to complete the checkout
+ * 
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ * Returns:
+ *     A dictionary containing the browser live view url
+ * 
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts # If you haven't already deployed this app
+ *  kernel invoke ts-advanced human-in-the-loop-sample
+ *  kernel logs ts-advanced -f # Open in separate tab
  */
 app.action("human-in-the-loop-sample", async (ctx: KernelContext): Promise<{ browser_live_view_url: string }> => {
   const kernelBrowser = await kernel.browsers.create({
@@ -95,17 +97,26 @@ app.action("human-in-the-loop-sample", async (ctx: KernelContext): Promise<{ bro
 });
 
 /** Auth example
- * We'll use Computer Use to check for upcoming Target deliveries,
- * This example auto-logs in on behalf of the user.
- * Provide the user's credentials as payload variables when invoking the app:
- * kernel deploy index.ts -e ANTHROPIC_API_KEY=<your_api_key>
- * kernel invoke ts-cu auth-sample -p '{"query": 
- * "If I have an upcoming delivery, return the delivery date.
- * If not, return No upcoming deliveries.",
- * "website": "goodeggs.com",
- * "auth": {"username": "your_username", "password": "your_password"}}'
- * We'll also use a persisted browser: the second time you run this action, the previous browser will restored and
- * the user will already be logged in
+ * Implements Anthropic Computer Use to to perform a task on behalf of the user 
+ * with their credentials. This example automatically logs in with the provided credentials.
+ * We'll also use a persisted browser: the second time you run this action, the previous
+ * browser will restored and the user will already be logged in.
+ * 
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ *     payload: An object with a query, website, and auth object
+ * Returns:
+ *     A dictionary containing the result of the task
+ * 
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts -e ANTHROPIC_API_KEY=<your_anthropic_api_key> # If you haven't already deployed this app
+ *  kernel invoke ts-advanced auth-sample -p '{"query": 
+ *    "If I have an upcoming delivery, return the delivery date.
+ *    If not, return No upcoming deliveries.",
+ *    "website": "goodeggs.com",
+ *    "auth": {"username": "your_username", "password": "your_password"}}'
+ *  kernel logs ts-advanced -f # Open in separate tab
  */
 interface AuthSampleInput {
   query: string;
@@ -148,10 +159,8 @@ app.action("auth-sample", async (ctx: KernelContext, payload?: AuthSampleInput):
     </Sensitive>
   `;
 
-  console.log("Prompt: ", prompt);
-
   try {
-    // Run the sampling loop
+    // Run the Computer Use sampling loop
     const finalMessages = await computerUseLoop({
       model: 'claude-sonnet-4-20250514',
       messages: [{

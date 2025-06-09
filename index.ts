@@ -63,9 +63,9 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     languages: [LANGUAGE_TYPESCRIPT],
   },
   [TEMPLATE_ADVANCED_SAMPLE]: {
-    name: "Persistent Browser",
+    name: "Advanced Samples",
     description:
-      "Implements a persistent browser that maintains state across invocations",
+      "Implements sample actions with advanced Kernel configs",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
   [TEMPLATE_COMPUTER_USE]: {
@@ -85,7 +85,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_STAGEHAND]:
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
-      'kernel invoke ts-advanced create-persistent-browser',
+      'kernel invoke ts-advanced test-captcha-solver',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
@@ -95,7 +95,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_BROWSER_USE]:
       'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
-      'kernel invoke python-advanced create-persistent-browser',
+      'kernel invoke python-advanced test-captcha-solver',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
   },
@@ -342,7 +342,7 @@ function printNextSteps(
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_COMPUTER_USE
       ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
-      : language === LANGUAGE_PYTHON && template === TEMPLATE_SAMPLE_APP
+      : language === LANGUAGE_PYTHON && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
       ? "kernel deploy main.py"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE
       ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
