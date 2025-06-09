@@ -297,7 +297,6 @@ function copyTemplateFiles(
     filter: (src, dest) => {
       const filename = path.basename(src);
       if (filename === '_gitignore') {
-        console.log("Copying _gitignore");
         fs.copyFileSync(src, dest);
         // Rename it to .gitignore
         fs.renameSync(dest, path.join(path.dirname(dest), '.gitignore'));
