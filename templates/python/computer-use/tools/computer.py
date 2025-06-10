@@ -22,6 +22,7 @@ TYPING_GROUP_SIZE = 50
 MODIFIER_KEY_MAP = {
     'ctrl': 'Control',
     'alt': 'Alt',
+    'cmd': 'Meta',
     'command': 'Meta',
     'win': 'Meta',
 }
@@ -37,7 +38,9 @@ KEY_MAP = {
     'home': 'Home',
     'end': 'End',
     'pageup': 'PageUp',
+    'page_up': 'PageUp',
     'pagedown': 'PageDown',
+    'page_down': 'PageDown',
     'delete': 'Delete',
     'backspace': 'Backspace',
     'tab': 'Tab',
