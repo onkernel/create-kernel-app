@@ -60,6 +60,9 @@ KEY_MAP = {
     'f10': 'F10',
     'f11': 'F11',
     'f12': 'F12',
+    'minus': '-',
+    'equal': '=',
+    'plus': '+',
 }
 
 Action_20241022 = Literal[

@@ -41,7 +41,10 @@ export class KeyboardUtils {
     'f10': 'F10',
     'f11': 'F11',
     'f12': 'F12',
-  };
+    'minus': '-',
+    'equal': '=',
+    'plus': '+',
+ };
 
   static isModifierKey(key: string | undefined): boolean {
     if (!key) return false;
