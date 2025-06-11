@@ -3,6 +3,7 @@ export class KeyboardUtils {
   private static readonly modifierKeyMap: Record<string, string> = {
     'ctrl': 'Control',
     'alt': 'Alt',
+    'cmd': 'Meta',
     'command': 'Meta',
     'win': 'Meta',
   };
@@ -18,7 +19,9 @@ export class KeyboardUtils {
     'home': 'Home',
     'end': 'End',
     'pageup': 'PageUp',
+    'page_up': 'PageUp',
     'pagedown': 'PageDown',
+    'page_down': 'PageDown',
     'delete': 'Delete',
     'backspace': 'Backspace',
     'tab': 'Tab',
@@ -38,7 +41,10 @@ export class KeyboardUtils {
     'f10': 'F10',
     'f11': 'F11',
     'f12': 'F12',
-  };
+    'minus': '-',
+    'equal': '=',
+    'plus': '+',
+ };
 
   static isModifierKey(key: string | undefined): boolean {
     if (!key) return false;
