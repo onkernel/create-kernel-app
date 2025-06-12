@@ -11,6 +11,7 @@ export class KeyboardUtils {
   private static readonly keyMap: Record<string, string> = {
     'return': 'Enter',
     'space': ' ',
+    'minus': 'Minus',
     'left': 'ArrowLeft',
     'right': 'ArrowRight',
     'up': 'ArrowUp',
