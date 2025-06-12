@@ -45,6 +45,7 @@ KEY_MAP = {
     'escape': 'Escape',
     'insert': 'Insert',
     'super_l': 'Meta',
+    'minus': 'Minus',
     'f1': 'F1',
     'f2': 'F2',
     'f3': 'F3',
