@@ -297,7 +297,6 @@ function copyTemplateFiles(
     filter: (src, dest) => {
       const filename = path.basename(src);
       if (filename === '_gitignore') {
-        console.log("Copying _gitignore");
         fs.copyFileSync(src, dest);
         // Rename it to .gitignore
         fs.renameSync(dest, path.join(path.dirname(dest), '.gitignore'));
@@ -368,16 +367,14 @@ function printNextSteps(
 🎉 Kernel app created successfully!
 
 Next steps:
+  brew install onkernel/tap/kernel
   cd ${appName}
   # Request early access for an API key: https://waitlist.onkernel.com/r/mZW2zz
   export KERNEL_API_KEY=<YOUR_API_KEY>
-  ${
-    language === LANGUAGE_PYTHON
-      ? "uv venv && source .venv/bin/activate && uv sync"
-      : ""
-  }
   ${deployCommand}
   ${INVOKE_SAMPLES[language][template]}
+  # Do this in a separate tab
+  export KERNEL_API_KEY=<YOUR_API_KEY>
   kernel logs ${REGISTERED_APP_NAMES[language][template]} --follow
   `)
   );
