@@ -18,7 +18,7 @@ const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 * Either that, or make sure you scroll down to see everything before deciding something isn't available.
 * When using your computer function calls, they take a while to run and send back to you.
 * Where possible/feasible, try to chain multiple of these calls all into one function calls request.
-* The current date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.
+* The current date is ${DateTime.now().toFormat('EEEE, MMMM d, yyyy')}.
 * After each step, take a screenshot and carefully evaluate if you have achieved the right outcome.
 * Explicitly show your thinking: "I have evaluated step X..." If not correct, try again.
 * Only when you confirm a step was executed correctly should you move on to the next one.
