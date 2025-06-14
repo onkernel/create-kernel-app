@@ -198,11 +198,11 @@ export class ComputerTool implements BaseAnthropicTool {
       
       if (scrollDirection === 'down' || scrollDirection === 'up') {
         const amount = pageDimensions.h * scrollFactor;
-        console.log(`Scrolling ${amount / pageDimensions.h * 100}% ${scrollDirection}`);
+        console.log(`Scrolling ${amount.toFixed(2)} pixels ${scrollDirection}`);
         await this.page.mouse.wheel(0, scrollDirection === 'down' ? amount : -amount);
       } else {
         const amount = pageDimensions.w * scrollFactor;
-        console.log(`Scrolling ${amount / pageDimensions.w * 100}% ${scrollDirection}`);
+        console.log(`Scrolling ${amount.toFixed(2)} pixels ${scrollDirection}`);
         await this.page.mouse.wheel(scrollDirection === 'right' ? amount : -amount, 0);
       }
       
