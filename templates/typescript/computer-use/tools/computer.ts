@@ -1,12 +1,14 @@
 import type { Page } from 'playwright';
-import { Action, ToolError } from './types/computer';
-import type { ActionParams, BaseAnthropicTool, ToolResult } from './types/computer';
+import { Action } from './types/computer';
+import type { ActionParams, BaseComputerTool } from './types/computer';
+import type { ComputerToolDef } from './types/base';
 import { KeyboardUtils } from './utils/keyboard';
 import { ActionValidator } from './utils/validator';
+import { ToolError, type ToolResult } from './types/base';
 
 const TYPING_DELAY_MS = 12;
 
-export class ComputerTool implements BaseAnthropicTool {
+export class ComputerTool implements BaseComputerTool {
   name: 'computer' = 'computer';
   protected page: Page;
   protected _screenshotDelay = 2.0;
@@ -46,15 +48,14 @@ export class ComputerTool implements BaseAnthropicTool {
     return this.version === '20241022' ? 'computer_20241022' : 'computer_20250124';
   }
 
-  toParams(): ActionParams {
-    const params = {
+  toParams(): ComputerToolDef {
+    return {
       name: this.name,
       type: this.apiType,
       display_width_px: 1280,
       display_height_px: 720,
       display_number: null,
     };
-    return params;
   }
 
   private getMouseButton(action: Action): 'left' | 'right' | 'middle' {
@@ -174,7 +175,7 @@ export class ComputerTool implements BaseAnthropicTool {
         throw new ToolError(`${action} is only available in version 20250124`);
       }
 
-      const scrollDirection = scrollDirectionParam || kwargs.scroll_direction;
+      const scrollDirection = scrollDirectionParam || kwargs.scroll_direction as string;
       const scrollAmountValue = scrollAmount || scroll_amount;
 
       if (!scrollDirection || !['up', 'down', 'left', 'right'].includes(scrollDirection)) {
