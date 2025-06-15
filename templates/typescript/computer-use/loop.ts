@@ -2,11 +2,11 @@ import { Anthropic } from '@anthropic-ai/sdk';
 import { DateTime } from 'luxon';
 import type { Page } from 'playwright';
 import type { BetaMessageParam, BetaTextBlock } from './types/beta';
-import { ToolCollection, DEFAULT_TOOL_VERSION, TOOL_GROUPS_BY_VERSION, type ToolVersion } from './tools/collection';
+import { ComputerUseToolCollection, DEFAULT_TOOL_VERSION, TOOL_GROUPS_BY_VERSION, type ToolVersion } from './tools/collection';
 import { responseToParams, maybeFilterToNMostRecentImages, injectPromptCaching, PROMPT_CACHING_BETA_FLAG } from './utils/message-processing';
 import { makeApiToolResult } from './utils/tool-results';
 import { ComputerTool20241022, ComputerTool20250124 } from './tools/computer';
-import type { ActionParams } from './tools/types/computer';
+import { PlaywrightTool } from './tools/playwright';
 import { Action } from './tools/types/computer';
 
 // System prompt optimized for the environment
@@ -27,7 +27,7 @@ const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 
 <IMPORTANT>
 * When using Chromium, if a startup wizard appears, IGNORE IT. Do not even click "skip this step".
-* Instead, click on the search bar on the center of the screen where it says "Search or enter address", and enter the appropriate search term or URL there.
+* Use the "goto" function provided by the tools to navigate to the desired URL.
 </IMPORTANT>`;
 
 // Add new type definitions
@@ -41,7 +41,9 @@ interface ExtraBodyConfig {
 }
 
 interface ToolUseInput extends Record<string, unknown> {
-  action: Action;
+  action?: Action;
+  method?: string;
+  args?: string[];
 }
 
 export async function samplingLoop({
@@ -69,7 +71,14 @@ export async function samplingLoop({
 }): Promise<BetaMessageParam[]> {
   const selectedVersion = toolVersion || DEFAULT_TOOL_VERSION;
   const toolGroup = TOOL_GROUPS_BY_VERSION[selectedVersion];
-  const toolCollection = new ToolCollection(...toolGroup.tools.map((Tool: typeof ComputerTool20241022 | typeof ComputerTool20250124) => new Tool(playwrightPage)));
+  
+  // Create computer tools
+  const computerTools = toolGroup.tools.map((Tool: typeof ComputerTool20241022 | typeof ComputerTool20250124) => new Tool(playwrightPage));
+  
+  // Create playwright tool
+  const playwrightTool = new PlaywrightTool(playwrightPage);
+  
+  const toolCollection = new ComputerUseToolCollection(...computerTools, playwrightTool);
   
   const system: BetaTextBlock = {
     type: 'text',
@@ -153,27 +162,19 @@ export async function samplingLoop({
     for (const contentBlock of responseParams) {
       if (contentBlock.type === 'tool_use' && contentBlock.name && contentBlock.input && typeof contentBlock.input === 'object') {
         const input = contentBlock.input as ToolUseInput;
-        if ('action' in input && typeof input.action === 'string') {
-          hasToolUse = true;
-          const toolInput: ActionParams = {
-            action: input.action as Action,
-            ...Object.fromEntries(
-              Object.entries(input).filter(([key]) => key !== 'action')
-            )
-          };
-          
-          try {
-            const result = await toolCollection.run(
-              contentBlock.name,
-              toolInput
-            );
+        hasToolUse = true;
+        
+        try {
+          const result = await toolCollection.run(
+            contentBlock.name,
+            input
+          );
 
-            const toolResult = makeApiToolResult(result, contentBlock.id!);
-            toolResultContent.push(toolResult);
-          } catch (error) {
-            console.error(error);
-            throw error;
-          }
+          const toolResult = makeApiToolResult(result, contentBlock.id!);
+          toolResultContent.push(toolResult);
+        } catch (error) {
+          console.error(error);
+          throw error;
         }
       }
     }
