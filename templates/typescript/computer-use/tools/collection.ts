@@ -1,7 +1,7 @@
 import { ComputerTool20241022, ComputerTool20250124 } from './computer';
 import type { PlaywrightActionParams } from './playwright';
 import { Action } from './types/computer';
-import type { ActionParams } from './types/computer';
+import type { ComputerActionParams } from './types/computer';
 import type { ComputerUseTool, ComputerUseToolDef, ToolResult } from './types/base';
 
 export type ToolVersion = 'computer_use_20250124' | 'computer_use_20241022' | 'computer_use_20250429';
@@ -64,7 +64,7 @@ export class ComputerUseToolCollection {
       return await tool.call(toolInput);
     } else {
       // Validate computer tool input
-      const computerInput = toolInput as ActionParams;
+      const computerInput = toolInput as ComputerActionParams;
       if (!computerInput.action || !Object.values(Action).includes(computerInput.action)) {
         throw new Error(`Invalid action ${computerInput.action} for tool ${name}`);
       }
