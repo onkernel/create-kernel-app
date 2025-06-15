@@ -1,11 +1,11 @@
 import type { Page } from 'playwright';
-import { ToolError, type ToolResult, type ComputerUseTool, type FunctionToolDef } from './types/base';
+import { ToolError, type ToolResult, type ComputerUseTool, type FunctionToolDef, type ActionParams } from './types/base';
 
 // Supported Playwright methods - initially only goto
 const SUPPORTED_METHODS = ['goto'] as const;
 type SupportedMethod = typeof SUPPORTED_METHODS[number];
 
-export interface PlaywrightActionParams extends Record<string, unknown> {
+export type PlaywrightActionParams = ActionParams & {
   method: string;
   args: string[];
 }
@@ -92,7 +92,7 @@ export class PlaywrightTool implements ComputerUseTool {
     }
   }
 
-  async call(params: Record<string, unknown>): Promise<ToolResult> {
+  async call(params: PlaywrightActionParams): Promise<ToolResult> {
     const { method, args } = params as PlaywrightActionParams;
 
     if (!this.validateMethod(method)) {

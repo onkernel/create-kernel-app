@@ -1,3 +1,5 @@
+export type ActionParams = Record<string, unknown>;
+
 export interface ToolResult {
   output?: string;
   error?: string;

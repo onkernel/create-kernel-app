@@ -1,4 +1,4 @@
-import type { ComputerUseTool, ComputerToolDef, ToolResult } from './base';
+import type { ComputerUseTool, ComputerToolDef, ToolResult, ActionParams } from './base';
 
 export enum Action {
   // Mouse actions
@@ -33,7 +33,7 @@ export type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 export type Coordinate = [number, number];
 export type Duration = number;
 
-export interface ActionParams extends Record<string, unknown> {
+export type ComputerActionParams =  ActionParams & {
   action: Action;
   text?: string;
   coordinate?: Coordinate;
@@ -48,5 +48,5 @@ export interface BaseComputerTool extends ComputerUseTool {
   name: string;
   apiType: string;
   toParams(): ComputerToolDef;
-  call(params: ActionParams): Promise<ToolResult>;
+  call(params: ComputerActionParams): Promise<ToolResult>;
 }

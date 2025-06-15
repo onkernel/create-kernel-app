@@ -1,6 +1,6 @@
 import type { Page } from 'playwright';
 import { Action } from './types/computer';
-import type { ActionParams, BaseComputerTool } from './types/computer';
+import type { BaseComputerTool, ComputerActionParams } from './types/computer';
 import type { ComputerToolDef } from './types/base';
 import { KeyboardUtils } from './utils/keyboard';
 import { ActionValidator } from './utils/validator';
@@ -137,7 +137,7 @@ export class ComputerTool implements BaseComputerTool {
     }
   }
 
-  async call(params: ActionParams): Promise<ToolResult> {
+  async call(params: ComputerActionParams): Promise<ToolResult> {
     const { 
       action, 
       text, 
