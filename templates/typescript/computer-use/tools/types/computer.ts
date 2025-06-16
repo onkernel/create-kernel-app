@@ -42,6 +42,7 @@ export type ComputerActionParams =  ActionParams & {
   scrollAmount?: number;
   duration?: Duration;
   key?: string;
+  [key: string]: Action | string | Coordinate | ScrollDirection | number | Duration | undefined;
 }
 
 export interface BaseComputerTool extends ComputerUseTool {
