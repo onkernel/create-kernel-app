@@ -28,6 +28,8 @@ const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 <IMPORTANT>
 * When using Chromium, if a startup wizard appears, IGNORE IT. Do not even click "skip this step".
 * Use the "goto" function provided by the tools to navigate to the desired URL.
+* If no specific URL is provided to achieve a goal or part of a goal, use Google (https://www.google.com) as your entry point to search for and navigate to relevant websites.
+* For ambiguous requests, use Google to find the most relevant site.
 </IMPORTANT>`;
 
 // Add new type definitions
