@@ -46,7 +46,6 @@ export type ComputerActionParams =  ActionParams & {
 }
 
 export interface BaseComputerTool extends ComputerUseTool {
-  name: string;
   apiType: string;
   toParams(): ComputerToolDef;
   call(params: ComputerActionParams): Promise<ToolResult>;
