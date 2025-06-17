@@ -38,6 +38,7 @@ from tools import (
     ToolResult,
     ToolVersion,
 )
+from tools.playwright import PlaywrightTool
 
 PROMPT_CACHING_BETA_FLAG = "prompt-caching-2024-07-31"
 
@@ -68,7 +69,9 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 
 <IMPORTANT>
 * When using Chromium, if a startup wizard appears, IGNORE IT. Do not even click "skip this step".
-* Instead, click on the search bar on the center of the screen where it says "Search or enter address", and enter the appropriate search term or URL there.
+* Use the "goto" function provided by the tools to navigate to the desired URL.
+* If no specific URL is provided to achieve a goal or part of a goal, use Google (https://www.google.com) as your entry point to search for and navigate to relevant websites.
+* For ambiguous requests, use Google to find the most relevant site.
 </IMPORTANT>"""
 
 
@@ -103,12 +106,15 @@ async def sampling_loop(
         playwright_page: The Playwright page instance for browser automation
     """
     tool_group = TOOL_GROUPS_BY_VERSION[tool_version]
-    tool_collection = ToolCollection(
-        *(
-            ToolCls(page=playwright_page if ToolCls.__name__.startswith("ComputerTool") else None)
-            for ToolCls in tool_group.tools
-        )
-    )
+
+    # Create computer tools
+    computer_tools = [Tool(playwright_page) for Tool in tool_group.tools]
+
+    # Create playwright tool
+    playwright_tool = PlaywrightTool(playwright_page)
+
+    tool_collection = ToolCollection(*computer_tools, playwright_tool)
+
     system = BetaTextBlockParam(
         type="text",
         text=f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}",
@@ -155,6 +161,9 @@ async def sampling_loop(
             betas=betas,
             extra_body=extra_body,
         )
+
+        print("response")
+        print(response)
 
         response_params = _response_to_params(response)
         messages.append(
