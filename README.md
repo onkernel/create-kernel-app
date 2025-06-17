@@ -1,5 +1,12 @@
 # create-kernel-app
 
+<p align="left">
+  <img alt="GitHub License" src="https://img.shields.io/github/license/onkernel/create-kernel-app">
+  <a href="https://discord.gg/FBrveQRcud"><img src="https://img.shields.io/discord/1342243238748225556?logo=discord&logoColor=white&color=7289DA" alt="Discord"></a>
+  <a href="https://x.com/juecd__"><img src="https://img.shields.io/twitter/follow/juecd__" alt="Follow @juecd__"></a>
+  <a href="https://x.com/rfgarcia"><img src="https://img.shields.io/twitter/follow/rfgarcia" alt="Follow @rfgarcia"></a>
+</p>
+
 A CLI tool to create the scaffolding for a  new Kernel applications. This tool helps you get started with building browser automation applications using Kernel's platform.
 
 ## Features
