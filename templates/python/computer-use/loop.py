@@ -55,7 +55,8 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You are utilising an Ubuntu virtual machine using {os.uname().machine} architecture with internet access.
 * When you connect to the display, CHROMIUM IS ALREADY OPEN. The url bar is not visible but it is there.
 * If you need to navigate to a new page, use ctrl+l to focus the url bar and then enter the url.
-* You won't be able  to see the url bar from the screenshot but ctrl-l still works.
+* You won't be able to see the url bar from the screenshot but ctrl-l still works.
+* As the initial step click on the search bar.
 * When viewing a page it can be helpful to zoom out so that you can see everything on the page.
 * Either that, or make sure you scroll down to see everything before deciding something isn't available.
 * When using your computer function calls, they take a while to run and send back to you.
