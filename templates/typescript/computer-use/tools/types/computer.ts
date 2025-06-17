@@ -1,3 +1,5 @@
+import type { ComputerUseTool, ComputerToolDef, ToolResult, ActionParams } from './base';
+
 export enum Action {
   // Mouse actions
   MOUSE_MOVE = 'mouse_move',
@@ -31,7 +33,7 @@ export type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 export type Coordinate = [number, number];
 export type Duration = number;
 
-export interface ActionParams {
+export type ComputerActionParams =  ActionParams & {
   action: Action;
   text?: string;
   coordinate?: Coordinate;
@@ -43,22 +45,8 @@ export interface ActionParams {
   [key: string]: Action | string | Coordinate | ScrollDirection | number | Duration | undefined;
 }
 
-export interface ToolResult {
-  output?: string;
-  error?: string;
-  base64Image?: string;
-  system?: string;
-}
-
-export interface BaseAnthropicTool {
-  name: string;
+export interface BaseComputerTool extends ComputerUseTool {
   apiType: string;
-  toParams(): ActionParams;
+  toParams(): ComputerToolDef;
+  call(params: ComputerActionParams): Promise<ToolResult>;
 }
-
-export class ToolError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ToolError';
-  }
-} 
