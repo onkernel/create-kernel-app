@@ -12,9 +12,7 @@ import { Action } from './tools/types/computer';
 // System prompt optimized for the environment
 const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 * You are utilising an Ubuntu virtual machine using ${process.arch} architecture with internet access.
-* When you connect to the display, CHROMIUM IS ALREADY OPEN. The url bar is not visible but it is there.
-* If you need to navigate to a new page, use ctrl+l to focus the url bar and then enter the url.
-* You won't be able  to see the url bar from the screenshot but ctrl-l still works.
+* When you connect to the display, CHROMIUM IS ALREADY OPEN.
 * When viewing a page it can be helpful to zoom out so that you can see everything on the page.
 * Either that, or make sure you scroll down to see everything before deciding something isn't available.
 * When using your computer function calls, they take a while to run and send back to you.
@@ -27,7 +25,8 @@ const SYSTEM_PROMPT = `<SYSTEM_CAPABILITY>
 
 <IMPORTANT>
 * When using Chromium, if a startup wizard appears, IGNORE IT. Do not even click "skip this step".
-* Use the "goto" function provided by the tools to navigate to the desired URL.
+* For ALL navigation needs, use the "goto" method - never use keyboard shortcuts or URL bar interactions.
+* The goto method is the reliable way to navigate to any website or URL.
 * If no specific URL is provided to achieve a goal or part of a goal, use Google (https://www.google.com) as your entry point to search for and navigate to relevant websites.
 * For ambiguous requests, use Google to find the most relevant site.
 </IMPORTANT>`;
