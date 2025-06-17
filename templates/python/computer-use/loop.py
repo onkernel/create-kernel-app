@@ -161,9 +161,6 @@ async def sampling_loop(
             extra_body=extra_body,
         )
 
-        print("response")
-        print(response)
-
         response_params = _response_to_params(response)
         messages.append(
             {
