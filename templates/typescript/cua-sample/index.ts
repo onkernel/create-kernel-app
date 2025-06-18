@@ -1,0 +1,110 @@
+// @ts-nocheck
+
+import "dotenv/config";
+import { Kernel, type KernelContext } from "@onkernel/sdk";
+import { chromium } from "playwright";
+import { Agent } from "./lib/agent";
+import computers from "./lib/computers";
+
+const kernel = new Kernel();
+const app = kernel.app("ts-cua");
+
+// LLM API Keys are set in the environment during `kernel deploy <filename> -e ANTHROPIC_API_KEY=XXX`
+// See https://docs.onkernel.com/launch/deploy#environment-variables
+if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not set');
+
+/**
+ * Example app that run an agent using openai CUA
+ * Args:
+ *     ctx: Kernel context containing invocation information
+ *     payload: An object with a `query` property
+ * Returns:
+ *     An answer to the query, elapsed time and optionally the messages stack
+ * Invoke this via CLI:
+ *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel deploy index.ts -e OPENAI_API_KEY=XXXXX --force
+ *  kernel invoke ts-cua agent-run -p "{\"query\":\"current market price range for a used dreamcast\"}"
+ *  kernel logs ts-cua -f # Open in separate tab
+ */
+
+interface CuaInput {
+	query: string;
+}
+
+interface CuaOutput {
+	elapsed: number;
+	response: Array<object>;
+	answer: object;
+}
+
+app.action<CuaInput, CuaOutput>(
+	"agent-run",
+	async (ctx: KernelContext, payload?: CuaInput): Promise<CuaOutput> => {
+		const startTime = Date.now();
+		const kernelBrowser = await kernel.browsers.create({
+			invocation_id: ctx.invocation_id,
+		});
+		console.log(
+			"> Kernel browser live view url: ",
+			kernelBrowser.browser_live_view_url,
+		);
+
+		try {
+
+			// kernel browser
+			const { computer } = await computers.create({
+				type: "kernel",
+				cdp_ws_url: kernelBrowser.cdp_ws_url,
+			});
+
+			// setup agent
+			const agent = new Agent(
+				"computer-use-preview",
+				computer,
+				[], // additional tools
+				(message: string) => {
+					console.log(`> safety check: ${message}`);
+					return true; // Auto-acknowledge all safety checks for testing
+				},
+			);
+
+			// start agent run
+			const response = await agent.runFullTurn(
+				[
+					{
+						role: "system",
+						content: `- Current date and time: ${new Date().toISOString()} (${new Date().toLocaleDateString("en-US", { weekday: "long" })})`,
+					},
+					{
+						type: "message",
+						role: "user",
+						content: [
+							{
+								type: "input_text",
+								text: payload.query,
+								// text: "go to https://news.ycombinator.com , open top article , describe the target website design (in yaml format)"
+							},
+						],
+					},
+				],
+				true, // print_steps
+				true, // debug
+				false, // show_images
+			);
+
+			console.log("> agent run done");
+
+			const endTime = Date.now();
+			const timeElapsed = (endTime - startTime) / 1000; // Convert to seconds
+
+			return {
+				// response, // full messages stack trace
+				elapsed: parseFloat(timeElapsed.toFixed(2)),
+				answer: response?.slice(-1)?.[0]?.content?.[0]?.text ?? null,
+			};
+		} finally {
+			// Note: KernelPlaywrightComputer handles browser cleanup internally
+			// No need to manually close browser here
+		}
+	},
+);
