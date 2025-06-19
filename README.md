@@ -47,7 +47,7 @@ create-kernel-app [app-name] [options]
   - `stagehand`: Template with Stagehand SDK (Typescript only)
   - `advanced-sample`: Implements sample apps using advanced Kernel configs
   - `computer-use`: Implements a prompt loop using Anthropic Computer Use
-  - `cua`: Implements a Computer Use Agent (OpenAI CUA) sample (Typescript only)
+  - `cua`: Implements a Computer Use Agent (OpenAI CUA) sample
 
 ### Examples
 
@@ -124,7 +124,10 @@ kernel invoke python-basic get-page-title --payload '{"url": "https://www.google
 kernel invoke python-bu bu-task --payload '{"task": "Compare the price of gpt-4o and DeepSeek-V3"}'
 
 # Typescript + CUA Sample
-kernel invoke ts-cua cua-task --payload '{"task": "open hackernews and get the top 5 articles"}'
+kernel invoke ts-cua cua-task --payload '{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}'
+
+# Python + CUA Sample
+kernel invoke python-cua cua-task --payload '{"task": "Get current market price range for an unboxed Dreamcast"}'
 ```
 
 ## Sample apps reference
