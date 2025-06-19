@@ -124,7 +124,7 @@ kernel invoke python-basic get-page-title --payload '{"url": "https://www.google
 kernel invoke python-bu bu-task --payload '{"task": "Compare the price of gpt-4o and DeepSeek-V3"}'
 
 # Typescript + CUA Sample
-kernel invoke ts-cua cua-task --payload '{"query": "open hackernews and get the top 5 articles"}'
+kernel invoke ts-cua cua-task --payload '{"task": "open hackernews and get the top 5 articles"}'
 ```
 
 ## Sample apps reference
@@ -138,7 +138,7 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
 | **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
 | **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
-| **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ query }` |
+| **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ task }` |
 
 ## Documentation
 

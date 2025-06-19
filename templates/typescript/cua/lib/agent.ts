@@ -47,13 +47,17 @@ export class Agent {
 	private show_images: boolean;
 	private acknowledge_safety_check_callback: AcknowledgeSafetyCheckCallback;
 
-	constructor(
-		model: string = "computer-use-preview",
-		computer: BasePlaywrightComputer | null = null,
-		tools: Tool[],
-		acknowledge_safety_check_callback: AcknowledgeSafetyCheckCallback = () =>
-			true,
-	) {
+	constructor({
+		model = "computer-use-preview",
+		computer = null,
+		tools = [],
+		acknowledge_safety_check_callback = () => true,
+	}: {
+		model?: string;
+		computer?: BasePlaywrightComputer | null;
+		tools?: Tool[];
+		acknowledge_safety_check_callback?: AcknowledgeSafetyCheckCallback;
+	}) {
 		this.model = model;
 		this.computer = computer;
 		this.tools = [...toolset.shared, ...tools];
