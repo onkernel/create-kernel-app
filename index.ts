@@ -18,7 +18,8 @@ type TemplateKey =
   | "browser-use"
   | "stagehand"
   | "advanced-sample"
-  | "computer-use";
+  | "computer-use"
+  | "cua";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -34,6 +35,7 @@ const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
+const TEMPLATE_CUA = "cua";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 
@@ -73,6 +75,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements the Anthropic Computer Use SDK",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
+  [TEMPLATE_CUA]: {
+    name: "CUA Sample",
+    description: "Implements a Computer Use Agent (OpenAI CUA) sample",
+    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
+  },
 };
 
 const INVOKE_SAMPLES: Record<
@@ -88,6 +95,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-advanced test-captcha-solver',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
+    [TEMPLATE_CUA]:
+      'kernel invoke ts-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -98,6 +107,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke python-advanced test-captcha-solver',
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
+    [TEMPLATE_CUA]:
+      'kernel invoke python-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
 };
 
@@ -114,6 +125,8 @@ const REGISTERED_APP_NAMES: Record<
       'ts-advanced',
     [TEMPLATE_COMPUTER_USE]:
       'ts-cu',
+    [TEMPLATE_CUA]:
+      'ts-cua',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -124,6 +137,8 @@ const REGISTERED_APP_NAMES: Record<
       'python-advanced',
     [TEMPLATE_COMPUTER_USE]:
       'python-cu',
+    [TEMPLATE_CUA]:
+      'python-cua',
   },
 };
 
@@ -354,12 +369,16 @@ function printNextSteps(
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_COMPUTER_USE
       ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
+      : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_CUA
+      ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_PYTHON && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
       ? "kernel deploy main.py"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE
       ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_COMPUTER_USE
       ? "kernel deploy main.py --env ANTHROPIC_API_KEY=XXX"
+      : language === LANGUAGE_PYTHON && template === TEMPLATE_CUA
+      ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
       : "";
 
   console.log(
