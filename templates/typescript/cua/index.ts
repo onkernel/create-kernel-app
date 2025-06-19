@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { Kernel, type KernelContext } from "@onkernel/sdk";
-import { chromium } from "playwright";
 import { Agent } from "./lib/agent";
 import computers from "./lib/computers";
 
