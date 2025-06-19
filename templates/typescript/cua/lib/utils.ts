@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import "dotenv/config";
 import sharp from "sharp";
 import OpenAI from "openai";
@@ -28,8 +26,6 @@ interface ComputerCallOutput {
 }
 
 interface Message {
-	type: string;
-	output?: any;
 	[key: string]: any;
 }
 
@@ -56,14 +52,6 @@ function sanitizeMessage(msg: Message): Message {
 
 async function createResponse(kwargs: any): Promise<any> {
 	const openai = new OpenAI();
-	/*
-	console.error("--- debug:utils:createResponse");
-	console.dir(
-		{ createResponse: { ...kwargs, input: kwargs.input?.map(sanitizeMessage) } },
-		{ depth: null },
-	);
-	*/
-	
 	try {
 		const response = await openai.responses.create(kwargs);
 		return response;

@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import utils from "../utils.ts";
 import sharp from "sharp";
 import type { Browser, Page, Route, Request } from "playwright";
@@ -47,6 +45,7 @@ interface Point {
  *   plus standard "Computer" actions like click, scroll, etc.
  * - We also have extra browser actions: `goto(url)` and `back()`.
  */
+
 export class BasePlaywrightComputer {
 	protected _browser: Browser | null = null;
 	protected _page: Page | null = null;
@@ -54,6 +53,16 @@ export class BasePlaywrightComputer {
 	constructor() {
 		this._browser = null;
 		this._page = null;
+	}
+
+	/**
+	 * Type guard to assert that this._page is present and is a Playwright Page.
+	 * Throws an error if not present.
+	 */
+	protected _assertPage(): asserts this is { _page: Page } {
+		if (!this._page) {
+			throw new Error("Playwright Page is not initialized. Did you forget to call enter()?");
+		}
 	}
 
 	getEnvironment(): string {
@@ -79,7 +88,8 @@ export class BasePlaywrightComputer {
 			}
 		};
 
-		await this._page!.route("**/*", handleRoute);
+		this._assertPage();
+		await this._page.route("**/*", handleRoute);
 		return this;
 	}
 
@@ -90,18 +100,21 @@ export class BasePlaywrightComputer {
 	}
 
 	getCurrentUrl(): string {
-		return this._page!.url();
+		this._assertPage();
+		return this._page.url();
 	}
 
 	// Common "Computer" actions
 	async screenshot(): Promise<string> {
+		this._assertPage();
 		// Capture only the viewport (not full_page)
-		const screenshotBuffer = await this._page!.screenshot({ fullPage: false });
+		const screenshotBuffer = await this._page.screenshot({ fullPage: false });
 		const webpBuffer = await sharp(screenshotBuffer).webp().toBuffer();
 		return webpBuffer.toString("base64");
 	}
 
 	async click(button: string = "left", x: number, y: number): Promise<void> {
+		this._assertPage();
 		// console.dir({ debug:{base:{click:{x,y,button}}} },{depth:null})
 		switch (button) {
 			case "back":
@@ -111,7 +124,7 @@ export class BasePlaywrightComputer {
 				await this.forward();
 				break;
 			case "wheel":
-				await this._page!.mouse.wheel(x, y);
+				await this._page.mouse.wheel(x, y);
 				break;
 			default:
 				const buttonMapping: Record<string, "left" | "right"> = {
@@ -120,12 +133,13 @@ export class BasePlaywrightComputer {
 				};
 				const buttonType =
 					buttonMapping[button as keyof typeof buttonMapping] || "left";
-				await this._page!.mouse.click(x, y, { button: buttonType });
+				await this._page.mouse.click(x, y, { button: buttonType });
 		}
 	}
 
 	async doubleClick(x: number, y: number): Promise<void> {
-		await this._page!.mouse.dblclick(x, y);
+		this._assertPage();
+		await this._page.mouse.dblclick(x, y);
 	}
 
 	async scroll(
@@ -134,23 +148,26 @@ export class BasePlaywrightComputer {
 		scrollX: number,
 		scrollY: number,
 	): Promise<void> {
-		await this._page!.mouse.move(x, y);
-		await this._page!.evaluate(`window.scrollBy(${scrollX}, ${scrollY})`);
+		this._assertPage();
+		await this._page.mouse.move(x, y);
+		await this._page.evaluate(`window.scrollBy(${scrollX}, ${scrollY})`);
 	}
 
 	async type(text: string): Promise<void> {
-		await this._page!.keyboard.type(text);
+		this._assertPage();
+		await this._page.keyboard.type(text);
 	}
 
 	async keypress(keys: string[]): Promise<void> {
+		this._assertPage();
 		const mappedKeys = keys.map(
 			(key) => CUA_KEY_TO_PLAYWRIGHT_KEY[key.toLowerCase()] || key,
 		);
 		for (const key of mappedKeys) {
-			await this._page!.keyboard.down(key);
+			await this._page.keyboard.down(key);
 		}
 		for (const key of mappedKeys.reverse()) {
-			await this._page!.keyboard.up(key);
+			await this._page.keyboard.up(key);
 		}
 	}
 
@@ -159,36 +176,40 @@ export class BasePlaywrightComputer {
 	}
 
 	async move(x: number, y: number): Promise<void> {
-		await this._page!.mouse.move(x, y);
+		this._assertPage();
+		await this._page.mouse.move(x, y);
 	}
 
 	async drag(path: Point[]): Promise<void> {
-		if (!path.length) {
-			return;
-		}
-		await this._page!.mouse.move(path[0].x, path[0].y);
-		await this._page!.mouse.down();
+		this._assertPage();
+		const first = path[0];
+		if (!first) return;
+		await this._page.mouse.move(first.x, first.y);
+		await this._page.mouse.down();
 		for (const point of path.slice(1)) {
-			await this._page!.mouse.move(point.x, point.y);
+			await this._page.mouse.move(point.x, point.y);
 		}
-		await this._page!.mouse.up();
+		await this._page.mouse.up();
 	}
 
 	// Extra browser-oriented actions
 	async goto(url: string): Promise<any> {
+		this._assertPage();
 		try {
-			return await this._page!.goto(url);
+			return await this._page.goto(url);
 		} catch (e) {
 			console.log(`Error navigating to ${url}: ${e}`);
 		}
 	}
 
 	async back(): Promise<any> {
-		return await this._page!.goBack();
+		this._assertPage();
+		return await this._page.goBack();
 	}
 
 	async forward(): Promise<any> {
-		return await this._page!.goForward();
+		this._assertPage();
+		return await this._page.goForward();
 	}
 
 	// Subclass hook

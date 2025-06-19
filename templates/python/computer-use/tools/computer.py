@@ -322,16 +322,26 @@ class ComputerTool20250124(BaseComputerTool, BaseAnthropicTool):
                 await self.page.mouse.move(x, y)
 
             # Map scroll directions to Playwright's wheel events
+            page_dimensions = await self.page.evaluate(
+                "() => Promise.resolve({ h: window.innerHeight, w: window.innerWidth })"
+            )
+            page_partitions = 25
+            scroll_factor = scroll_amount / page_partitions
+            page_width = page_dimensions['w']
+            page_height = page_dimensions['h']
+
             delta_x = 0
             delta_y = 0
             if scroll_direction == "up":
-                delta_y = -scroll_amount * 100
+                delta_y = -scroll_factor * page_height
             elif scroll_direction == "down":
-                delta_y = scroll_amount * 100
+                delta_y = scroll_factor * page_height
             elif scroll_direction == "left":
-                delta_x = -scroll_amount * 100
+                delta_x = -scroll_factor * page_width
             elif scroll_direction == "right":
-                delta_x = scroll_amount * 100
+                delta_x = scroll_factor * page_width
+
+            print(f"Scrolling {abs(delta_x) if delta_x != 0 else abs(delta_y):.02f} pixels {scroll_direction}")
 
             await self.page.mouse.wheel(delta_x=delta_x, delta_y=delta_y)
             return await self.screenshot()

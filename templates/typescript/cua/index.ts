@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import "dotenv/config";
 import { Kernel, type KernelContext } from "@onkernel/sdk";
 import { chromium } from "playwright";
@@ -23,7 +21,7 @@ if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not set');
  * Invoke this via CLI:
  *  export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts -e OPENAI_API_KEY=XXXXX --force
- *  kernel invoke ts-cua agent-run -p "{\"query\":\"current market price range for a used dreamcast\"}"
+ *  kernel invoke ts-cua cua-task -p "{\"query\":\"current market price range for a used dreamcast\"}"
  *  kernel logs ts-cua -f # Open in separate tab
  */
 
@@ -33,12 +31,12 @@ interface CuaInput {
 
 interface CuaOutput {
 	elapsed: number;
-	response: Array<object>;
+	response?: Array<object>;
 	answer: object;
 }
 
 app.action<CuaInput, CuaOutput>(
-	"agent-run",
+	"cua-task",
 	async (ctx: KernelContext, payload?: CuaInput): Promise<CuaOutput> => {
 		const startTime = Date.now();
 		const kernelBrowser = await kernel.browsers.create({
@@ -48,6 +46,10 @@ app.action<CuaInput, CuaOutput>(
 			"> Kernel browser live view url: ",
 			kernelBrowser.browser_live_view_url,
 		);
+
+		if (!payload?.query){
+			throw new Error('query is required');
+		}
 
 		try {
 
@@ -69,8 +71,8 @@ app.action<CuaInput, CuaOutput>(
 			);
 
 			// start agent run
-			const response = await agent.runFullTurn(
-				[
+			const response = await agent.runFullTurn({
+				messages: [
 					{
 						role: "system",
 						content: `- Current date and time: ${new Date().toISOString()} (${new Date().toLocaleDateString("en-US", { weekday: "long" })})`,
@@ -87,10 +89,10 @@ app.action<CuaInput, CuaOutput>(
 						],
 					},
 				],
-				true, // print_steps
-				true, // debug
-				false, // show_images
-			);
+				print_steps: true, // log function_call and computer_call actions
+				debug: true, // show agent debug logs (llm messages and responses)
+				show_images: false, // if set to true, response messages stack will return base64 images (webp format) of screenshots, if false, replaced with "[omitted]""
+			});
 
 			console.log("> agent run done");
 

@@ -1,10 +1,13 @@
-// @ts-nocheck
-
 import utils from "./utils";
 import computers from "./computers";
 import toolset from "./toolset";
 
 import type { BasePlaywrightComputer } from "./playwright/base";
+
+
+interface Item {
+	[key: string]: any;
+}
 
 interface Tool {
 	type: string;
@@ -16,21 +19,6 @@ interface Tool {
 
 interface SafetyCheck {
 	message: string;
-	[key: string]: any;
-}
-
-interface Item {
-	type: string;
-	content?: Array<{ type: string; text: string }>;
-	name?: string;
-	arguments?: string;
-	call_id?: string;
-	action?: {
-		type: string;
-		[key: string]: any;
-	};
-	pending_safety_checks?: SafetyCheck[];
-	role?: string;
 	[key: string]: any;
 }
 
@@ -95,8 +83,8 @@ export class Agent {
 	private async handleItem(item: Item): Promise<Item[]> {
 		/**Handle each item; may cause a computer action + screenshot.*/
 		if (item.type === "message") {
-			if (this.print_steps) {
-				console.log(item.content![0].text);
+			if (this.print_steps && item.content?.[0]?.text) {
+				console.log(item.content[0].text);
 			}
 		}
 
@@ -171,12 +159,17 @@ export class Agent {
 		return [];
 	}
 
-	async runFullTurn(
-		input_items: Item[],
-		print_steps: boolean = true,
-		debug: boolean = false,
-		show_images: boolean = false,
-	): Promise<Item[]> {
+	async runFullTurn({
+		messages,
+		print_steps = true,
+		debug = false,
+		show_images = false,
+	}: {
+		messages: Item[];
+		print_steps?: boolean;
+		debug?: boolean;
+		show_images?: boolean;
+	}): Promise<Item[]> {
 		this.print_steps = print_steps;
 		this.debug = debug;
 		this.show_images = show_images;
@@ -185,15 +178,15 @@ export class Agent {
 		// keep looping until we get a final response
 		while (
 			new_items.length === 0 ||
-			new_items[new_items.length - 1].role !== "assistant"
+			(new_items[new_items.length - 1]?.role !== "assistant")
 		) {
 			this.debugPrint(
-				input_items.concat(new_items).map((msg) => utils.sanitizeMessage(msg)),
+				messages.concat(new_items).map((msg) => utils.sanitizeMessage(msg)),
 			);
 
 			const response = await utils.createResponse({
 				model: this.model,
-				input: input_items.concat(new_items),
+				input: messages.concat(new_items),
 				tools: this.tools,
 				truncation: "auto",
 			});
@@ -202,7 +195,7 @@ export class Agent {
 			if (!response.output && this.debug) {
 				console.log(response);
 				throw new Error("No output from model");
-			} else {
+			} else if (response.output) {
 				new_items.push(...response.output);
 				for (const item of response.output) {
 					const handled_items = await this.handleItem(item);

@@ -19,7 +19,7 @@ type TemplateKey =
   | "stagehand"
   | "advanced-sample"
   | "computer-use"
-  | "cua-sample";
+  | "cua";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -35,7 +35,7 @@ const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
-const TEMPLATE_CUA_SAMPLE = "cua-sample";
+const TEMPLATE_CUA_SAMPLE = "cua";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 

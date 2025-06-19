@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { chromium, type Browser, type Page } from "playwright";
 import { BasePlaywrightComputer } from "./base";
 
@@ -52,24 +50,40 @@ export class LocalPlaywrightComputer extends BasePlaywrightComputer {
 	private _handlePageClose(page: Page): void {
 		/** Handle the closure of a page. */
 		console.log("Page closed");
-		if (this._page === page) {
-			// Check if browser and contexts exist before accessing
-			if (
-				this._browser &&
-				this._browser.contexts &&
-				this._browser.contexts.length > 0
-			) {
-				const context = this._browser.contexts[0];
-				if (context.pages && context.pages.length > 0) {
-					this._page = context.pages[context.pages.length - 1];
-				} else {
-					console.log("Warning: All pages have been closed.");
-					this._page = null;
-				}
-			} else {
-				console.log("Warning: Browser or context not available.");
-				this._page = null;
-			}
+		try {
+			this._assertPage();
+		} catch {
+			return;
+		}
+		if (this._page !== page) return;
+
+		const browser = this._browser;
+		if (!browser || typeof browser.contexts !== "function") {
+			console.log("Warning: Browser or context not available.");
+			this._page = undefined as any;
+			return;
+		}
+
+		const contexts = browser.contexts();
+		if (!contexts.length) {
+			console.log("Warning: No browser contexts available.");
+			this._page = undefined as any;
+			return;
+		}
+
+		const context = contexts[0];
+		if (!context || typeof context.pages !== "function") {
+			console.log("Warning: Context pages not available.");
+			this._page = undefined as any;
+			return;
+		}
+
+		const pages = context.pages();
+		if (pages.length) {
+			this._page = pages[pages.length - 1]!;
+		} else {
+			console.log("Warning: All pages have been closed.");
+			this._page = undefined as any;
 		}
 	}
 }
