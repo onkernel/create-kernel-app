@@ -47,6 +47,7 @@ create-kernel-app [app-name] [options]
   - `stagehand`: Template with Stagehand SDK (Typescript only)
   - `advanced-sample`: Implements sample apps using advanced Kernel configs
   - `computer-use`: Implements a prompt loop using Anthropic Computer Use
+  - `cua`: Implements a Computer Use Agent (OpenAI CUA) sample
 
 ### Examples
 
@@ -121,6 +122,12 @@ kernel invoke python-basic get-page-title --payload '{"url": "https://www.google
 
 # Python + Browser Use
 kernel invoke python-bu bu-task --payload '{"task": "Compare the price of gpt-4o and DeepSeek-V3"}'
+
+# Typescript + CUA Sample
+kernel invoke ts-cua cua-task --payload '{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}'
+
+# Python + CUA Sample
+kernel invoke python-cua cua-task --payload '{"task": "Get current market price range for an unboxed Dreamcast"}'
 ```
 
 ## Sample apps reference
@@ -134,6 +141,7 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
 | **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
 | **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
+| **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ task }` |
 
 ## Documentation
 

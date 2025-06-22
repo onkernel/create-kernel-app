@@ -1,0 +1,15 @@
+{
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"@onkernel/sdk": "^0.6.0",
+		"@types/node": "^24.0.3",
+		"dotenv": "^16.5.0",
+		"openai": "^5.5.1",
+		"playwright": "^1.53.0",
+		"sharp": "^0.34.2"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.3"
+	}
+}

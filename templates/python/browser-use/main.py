@@ -1,8 +1,9 @@
 from langchain_openai import ChatOpenAI
-from browser_use import Agent, BrowserSession
+from browser_use import Agent
 import kernel
 from kernel import Kernel
 from typing import TypedDict
+from session import BrowserSessionCustomResize
 
 client = Kernel()
 
@@ -13,7 +14,7 @@ class TaskInput(TypedDict):
     
 # LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
 # See https://docs.onkernel.com/launch/deploy#environment-variables
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="gpt-4o-mini")
 
 @app.action("bu-task")
 async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
@@ -37,7 +38,7 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
         #task="Compare the price of gpt-4o and DeepSeek-V3",
         task=input_data["task"],
         llm=llm,
-        browser_session=BrowserSession(cdp_url=kernel_browser.cdp_ws_url)
+        browser_session=BrowserSessionCustomResize(cdp_url=kernel_browser.cdp_ws_url)
     )
     result = await agent.run()
     if result.final_result() is not None:
