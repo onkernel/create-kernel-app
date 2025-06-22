@@ -15,6 +15,9 @@ Please provide an explanation of the changes you've made:
 - [ ] Linted
 - [ ] Added tests for new functionality (if applicable)
 
+## Docs
+- [ ] Link to a PR in our [docs repo](https://github.com/onkernel/docs) documenting your change (if applicable)
+
 ## Visual Proof
 
 Please provide a screenshot or video demonstrating that your changes work locally:
