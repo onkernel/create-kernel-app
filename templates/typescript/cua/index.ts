@@ -14,7 +14,7 @@ interface CuaOutput {
 }
 
 const kernel = new Kernel();
-const app = kernel.app('ts-cua-dev');
+const app = kernel.app('ts-cua');
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set');
