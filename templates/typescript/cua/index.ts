@@ -14,7 +14,7 @@ interface CuaOutput {
 }
 
 const kernel = new Kernel();
-const app = kernel.app('ts-cua');
+const app = kernel.app('ts-cua-dev');
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set');
@@ -30,7 +30,7 @@ if (!process.env.OPENAI_API_KEY) {
  * Invoke this via CLI:
  *  export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts -e OPENAI_API_KEY=XXXXX --force
- *  kernel invoke ts-cua cua-task -p "{\"task\":\"go to ebay.com and find the current market price range for a dreamcast\"}"
+ *  kernel invoke ts-cua cua-task -p "{\"task\":\"current market price range for a used dreamcast\"}"
  *  kernel logs ts-cua -f # Open in separate tab
  */
 
@@ -49,7 +49,7 @@ app.action<CuaInput, CuaOutput>(
         model: 'computer-use-preview',
         computer,
         tools: [],
-        acknowledge_safety_check_callback: (m: string) => {
+        acknowledge_safety_check_callback: (m: string): boolean => {
           console.log(`> safety check: ${m}`);
           return true;
         },

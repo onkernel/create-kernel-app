@@ -41,7 +41,7 @@ export class Agent {
     this.model = opts.model ?? 'computer-use-preview';
     this.computer = opts.computer;
     this.tools = [...toolset.shared, ...(opts.tools ?? [])] as ComputerTool[];
-    this.ackCb = opts.acknowledge_safety_check_callback ?? (() => true);
+    this.ackCb = opts.acknowledge_safety_check_callback ?? ((): boolean => true);
 
     if (this.computer) {
       const [w, h] = this.computer.getDimensions();
@@ -62,7 +62,7 @@ export class Agent {
           args.map((msg) => utils.sanitizeMessage(msg as ResponseItem)),
           { depth: null },
         );
-      } catch (e) {
+      } catch {
         console.dir(args, { depth: null });
       }
     }
