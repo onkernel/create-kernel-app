@@ -1,220 +1,242 @@
-import utils from "../utils.ts";
-import sharp from "sharp";
-import type { Browser, Page, Route, Request } from "playwright";
+import utils from '../utils';
+import sharp from 'sharp';
+import type { Browser, Page, Route, Request, Response } from 'playwright';
 
-// Optional: key mapping if your model uses "CUA" style keys
-const CUA_KEY_TO_PLAYWRIGHT_KEY: Record<string, string> = {
-	"/": "/",
-	"\\": "\\",
-	alt: "Alt",
-	arrowdown: "ArrowDown",
-	arrowleft: "ArrowLeft",
-	arrowright: "ArrowRight",
-	arrowup: "ArrowUp",
-	backspace: "Backspace",
-	capslock: "CapsLock",
-	cmd: "Meta",
-	ctrl: "Control",
-	delete: "Delete",
-	end: "End",
-	enter: "Enter",
-	esc: "Escape",
-	home: "Home",
-	insert: "Insert",
-	option: "Alt",
-	pagedown: "PageDown",
-	pageup: "PageUp",
-	shift: "Shift",
-	space: " ",
-	super: "Meta",
-	tab: "Tab",
-	win: "Meta",
+// CUA key -> Playwright key mapping
+const KEY_MAP: Record<string, string> = {
+  '/': '/',
+  '\\': '\\',
+  alt: 'Alt',
+  arrowdown: 'ArrowDown',
+  arrowleft: 'ArrowLeft',
+  arrowright: 'ArrowRight',
+  arrowup: 'ArrowUp',
+  backspace: 'Backspace',
+  capslock: 'CapsLock',
+  cmd: 'Meta',
+  ctrl: 'Control',
+  delete: 'Delete',
+  end: 'End',
+  enter: 'Enter',
+  esc: 'Escape',
+  home: 'Home',
+  insert: 'Insert',
+  option: 'Alt',
+  pagedown: 'PageDown',
+  pageup: 'PageUp',
+  shift: 'Shift',
+  space: ' ',
+  super: 'Meta',
+  tab: 'Tab',
+  win: 'Meta',
 };
 
 interface Point {
-	x: number;
-	y: number;
+  x: number;
+  y: number;
 }
 
-/**
- * Abstract base for Playwright-based computers:
- *
- * - Subclasses override `_getBrowserAndPage()` to do local or remote connection,
- *   returning [Browser, Page].
- * - This base class handles context creation (`enter()`/`exit()`),
- *   plus standard "Computer" actions like click, scroll, etc.
- * - We also have extra browser actions: `goto(url)` and `back()`.
- */
-
 export class BasePlaywrightComputer {
-	protected _browser: Browser | null = null;
-	protected _page: Page | null = null;
+  protected _browser: Browser | null = null;
+  protected _page: Page | null = null;
 
-	constructor() {
-		this._browser = null;
-		this._page = null;
-	}
+  constructor() {
+    this._browser = null;
+    this._page = null;
+  }
 
-	/**
-	 * Type guard to assert that this._page is present and is a Playwright Page.
-	 * Throws an error if not present.
-	 */
-	protected _assertPage(): asserts this is { _page: Page } {
-		if (!this._page) {
-			throw new Error("Playwright Page is not initialized. Did you forget to call enter()?");
-		}
-	}
+  /**
+   * Type guard to assert that this._page is present and is a Playwright Page.
+   * Throws an error if not present.
+   */
+  protected _assertPage(): asserts this is { _page: Page } {
+    if (!this._page) {
+      throw new Error('Playwright Page is not initialized. Did you forget to call enter()?');
+    }
+  }
 
-	getEnvironment(): string {
-		return "browser";
-	}
+  protected _handleNewPage = (page: Page): void => {
+    /** Handle the creation of a new page. */
+    console.log('New page created');
+    this._page = page;
+    page.on('close', this._handlePageClose.bind(this));
+  };
 
-	getDimensions(): [number, number] {
-		return [1024, 768];
-	}
+  protected _handlePageClose = (page: Page): void => {
+    /** Handle the closure of a page. */
+    console.log('Page closed');
+    try {
+      this._assertPage();
+    } catch {
+      return;
+    }
+    if (this._page !== page) return;
 
-	async enter(): Promise<this> {
-		// Call the subclass hook for getting browser/page
-		[this._browser, this._page] = await this._getBrowserAndPage();
+    const browser = this._browser;
+    if (!browser || typeof browser.contexts !== 'function') {
+      console.log('Warning: Browser or context not available.');
+      this._page = undefined as unknown as Page;
+      return;
+    }
 
-		// Set up network interception to flag URLs matching domains in BLOCKED_DOMAINS
-		const handleRoute = (route: Route, request: Request): void => {
-			const url = request.url();
-			if (utils.checkBlocklistedUrl(url)) {
-				console.log(`Flagging blocked domain: ${url}`);
-				route.abort();
-			} else {
-				route.continue();
-			}
-		};
+    const contexts = browser.contexts();
+    if (!contexts.length) {
+      console.log('Warning: No browser contexts available.');
+      this._page = undefined as unknown as Page;
+      return;
+    }
 
-		this._assertPage();
-		await this._page.route("**/*", handleRoute);
-		return this;
-	}
+    const context = contexts[0];
+    if (!context || typeof context.pages !== 'function') {
+      console.log('Warning: Context pages not available.');
+      this._page = undefined as unknown as Page;
+      return;
+    }
 
-	async exit(): Promise<void> {
-		if (this._browser) {
-			await this._browser.close();
-		}
-	}
+    const pages = context.pages();
+    if (pages.length) {
+      this._page = pages[pages.length - 1] as Page;
+    } else {
+      console.log('Warning: All pages have been closed.');
+      this._page = undefined as unknown as Page;
+    }
+  };
 
-	getCurrentUrl(): string {
-		this._assertPage();
-		return this._page.url();
-	}
+  // Subclass hook
+  protected _getBrowserAndPage = async (): Promise<[Browser, Page]> => {
+    // Subclasses must implement, returning [Browser, Page]
+    throw new Error('Subclasses must implement _getBrowserAndPage()');
+  };
 
-	// Common "Computer" actions
-	async screenshot(): Promise<string> {
-		this._assertPage();
-		// Capture only the viewport (not full_page)
-		const screenshotBuffer = await this._page.screenshot({ fullPage: false });
-		const webpBuffer = await sharp(screenshotBuffer).webp().toBuffer();
-		return webpBuffer.toString("base64");
-	}
+  getEnvironment = (): 'windows' | 'mac' | 'linux' | 'ubuntu' | 'browser' => {
+    return 'browser';
+  };
 
-	async click(button: string = "left", x: number, y: number): Promise<void> {
-		this._assertPage();
-		// console.dir({ debug:{base:{click:{x,y,button}}} },{depth:null})
-		switch (button) {
-			case "back":
-				await this.back();
-				break;
-			case "forward":
-				await this.forward();
-				break;
-			case "wheel":
-				await this._page.mouse.wheel(x, y);
-				break;
-			default:
-				const buttonMapping: Record<string, "left" | "right"> = {
-					left: "left",
-					right: "right",
-				};
-				const buttonType =
-					buttonMapping[button as keyof typeof buttonMapping] || "left";
-				await this._page.mouse.click(x, y, { button: buttonType });
-		}
-	}
+  getDimensions = (): [number, number] => {
+    return [1024, 768];
+  };
 
-	async doubleClick(x: number, y: number): Promise<void> {
-		this._assertPage();
-		await this._page.mouse.dblclick(x, y);
-	}
+  enter = async (): Promise<this> => {
+    // Call the subclass hook for getting browser/page
+    [this._browser, this._page] = await this._getBrowserAndPage();
 
-	async scroll(
-		x: number,
-		y: number,
-		scrollX: number,
-		scrollY: number,
-	): Promise<void> {
-		this._assertPage();
-		await this._page.mouse.move(x, y);
-		await this._page.evaluate(`window.scrollBy(${scrollX}, ${scrollY})`);
-	}
+    // Set up network interception to flag URLs matching domains in BLOCKED_DOMAINS
+    const handleRoute = (route: Route, request: Request): void => {
+      const url = request.url();
+      if (utils.checkBlocklistedUrl(url)) {
+        console.log(`Flagging blocked domain: ${url}`);
+        route.abort();
+      } else {
+        route.continue();
+      }
+    };
 
-	async type(text: string): Promise<void> {
-		this._assertPage();
-		await this._page.keyboard.type(text);
-	}
+    this._assertPage();
+    await this._page.route('**/*', handleRoute);
+    return this;
+  };
 
-	async keypress(keys: string[]): Promise<void> {
-		this._assertPage();
-		const mappedKeys = keys.map(
-			(key) => CUA_KEY_TO_PLAYWRIGHT_KEY[key.toLowerCase()] || key,
-		);
-		for (const key of mappedKeys) {
-			await this._page.keyboard.down(key);
-		}
-		for (const key of mappedKeys.reverse()) {
-			await this._page.keyboard.up(key);
-		}
-	}
+  exit = async (): Promise<void> => {
+    if (this._browser) await this._browser.close();
+  };
 
-	async wait(ms: number = 1000): Promise<void> {
-		await new Promise((resolve) => setTimeout(resolve, ms));
-	}
+  getCurrentUrl = (): string => {
+    this._assertPage();
+    return this._page.url();
+  };
 
-	async move(x: number, y: number): Promise<void> {
-		this._assertPage();
-		await this._page.mouse.move(x, y);
-	}
+  screenshot = async (): Promise<string> => {
+    this._assertPage();
+    const buf = await this._page.screenshot({ fullPage: false });
+    const webp = await sharp(buf).webp().toBuffer();
+    return webp.toString('base64');
+  };
 
-	async drag(path: Point[]): Promise<void> {
-		this._assertPage();
-		const first = path[0];
-		if (!first) return;
-		await this._page.mouse.move(first.x, first.y);
-		await this._page.mouse.down();
-		for (const point of path.slice(1)) {
-			await this._page.mouse.move(point.x, point.y);
-		}
-		await this._page.mouse.up();
-	}
+  click = async (
+    button: 'left' | 'right' | 'back' | 'forward' | 'wheel',
+    x: number,
+    y: number,
+  ): Promise<void> => {
+    this._assertPage();
+    switch (button) {
+      case 'back':
+        await this.back();
+        return;
+      case 'forward':
+        await this.forward();
+        return;
+      case 'wheel':
+        await this._page.mouse.wheel(x, y);
+        return;
+      default: {
+        const btn = button === 'right' ? 'right' : 'left';
+        await this._page.mouse.click(x, y, { button: btn });
+        return;
+      }
+    }
+  };
 
-	// Extra browser-oriented actions
-	async goto(url: string): Promise<any> {
-		this._assertPage();
-		try {
-			return await this._page.goto(url);
-		} catch (e) {
-			console.log(`Error navigating to ${url}: ${e}`);
-		}
-	}
+  doubleClick = async (x: number, y: number): Promise<void> => {
+    this._assertPage();
+    await this._page.mouse.dblclick(x, y);
+  };
 
-	async back(): Promise<any> {
-		this._assertPage();
-		return await this._page.goBack();
-	}
+  scroll = async (x: number, y: number, scrollX: number, scrollY: number): Promise<void> => {
+    this._assertPage();
+    await this._page.mouse.move(x, y);
+    await this._page.evaluate(
+      (params: { dx: number; dy: number }) => window.scrollBy(params.dx, params.dy),
+      { dx: scrollX, dy: scrollY },
+    );
+  };
 
-	async forward(): Promise<any> {
-		this._assertPage();
-		return await this._page.goForward();
-	}
+  type = async (text: string): Promise<void> => {
+    this._assertPage();
+    await this._page.keyboard.type(text);
+  };
 
-	// Subclass hook
-	async _getBrowserAndPage(): Promise<[Browser, Page]> {
-		// Subclasses must implement, returning [Browser, Page]
-		throw new Error("Subclasses must implement _getBrowserAndPage()");
-	}
+  keypress = async (keys: string[]): Promise<void> => {
+    this._assertPage();
+    const mapped = keys.map((k) => KEY_MAP[k.toLowerCase()] ?? k);
+    for (const k of mapped) await this._page.keyboard.down(k);
+    for (const k of [...mapped].reverse()) await this._page.keyboard.up(k);
+  };
+
+  wait = async (ms = 1000): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  move = async (x: number, y: number): Promise<void> => {
+    this._assertPage();
+    await this._page.mouse.move(x, y);
+  };
+
+  drag = async (path: Point[]): Promise<void> => {
+    this._assertPage();
+    const first = path[0];
+    if (!first) return;
+    await this._page.mouse.move(first.x, first.y);
+    await this._page.mouse.down();
+    for (const pt of path.slice(1)) await this._page.mouse.move(pt.x, pt.y);
+    await this._page.mouse.up();
+  };
+
+  goto = async (url: string): Promise<Response | null> => {
+    this._assertPage();
+    try {
+      return await this._page.goto(url);
+    } catch {
+      return null;
+    }
+  };
+
+  back = async (): Promise<Response | null> => {
+    this._assertPage();
+    return (await this._page.goBack()) || null;
+  };
+
+  forward = async (): Promise<Response | null> => {
+    this._assertPage();
+    return (await this._page.goForward()) || null;
+  };
 }

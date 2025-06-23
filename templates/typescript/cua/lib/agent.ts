@@ -1,220 +1,209 @@
-import utils from "./utils";
-import computers from "./computers";
-import toolset from "./toolset";
+import {
+  type ResponseItem,
+  type ResponseInputItem,
+  type ResponseOutputMessage,
+  type ResponseFunctionToolCallItem,
+  type ResponseFunctionToolCallOutputItem,
+  type ResponseComputerToolCall,
+  type ResponseComputerToolCallOutputItem,
+  type ComputerTool,
+} from 'openai/resources/responses/responses';
 
-import type { BasePlaywrightComputer } from "./playwright/base";
+import * as utils from './utils';
+import toolset from './toolset';
+import type { BasePlaywrightComputer } from './playwright/base';
+import type { LocalPlaywrightComputer } from './playwright/local';
+import type { KernelPlaywrightComputer } from './playwright/kernel';
 
-
-interface Item {
-	[key: string]: any;
-}
-
-interface Tool {
-	type: string;
-	display_width?: number;
-	display_height?: number;
-	environment?: string;
-	[key: string]: any;
-}
-
-interface SafetyCheck {
-	message: string;
-	[key: string]: any;
-}
-
-interface ComputerCallOutput {
-	type: string;
-	call_id: string;
-	acknowledged_safety_checks: SafetyCheck[];
-	output: {
-		type: string;
-		image_url: string;
-		current_url?: string;
-	};
-}
-
-type AcknowledgeSafetyCheckCallback = (message: string) => boolean;
-
-/**
- * A sample agent class that can be used to interact with a computer.
- */
 export class Agent {
-	private model: string;
-	private computer: BasePlaywrightComputer | null;
-	private tools: Tool[];
-	private print_steps: boolean;
-	private debug: boolean;
-	private show_images: boolean;
-	private acknowledge_safety_check_callback: AcknowledgeSafetyCheckCallback;
+  private model: string;
+  private computer:
+    | BasePlaywrightComputer
+    | LocalPlaywrightComputer
+    | KernelPlaywrightComputer
+    | undefined;
+  private tools: ComputerTool[];
+  private print_steps = true;
+  private debug = false;
+  private show_images = false;
+  private ackCb: (msg: string) => boolean;
 
-	constructor({
-		model = "computer-use-preview",
-		computer = null,
-		tools = [],
-		acknowledge_safety_check_callback = () => true,
-	}: {
-		model?: string;
-		computer?: BasePlaywrightComputer | null;
-		tools?: Tool[];
-		acknowledge_safety_check_callback?: AcknowledgeSafetyCheckCallback;
-	}) {
-		this.model = model;
-		this.computer = computer;
-		this.tools = [...toolset.shared, ...tools];
-		this.print_steps = true;
-		this.debug = false;
-		this.show_images = false;
-		this.acknowledge_safety_check_callback = acknowledge_safety_check_callback;
+  constructor(opts: {
+    model?: string;
+    computer?:
+      | BasePlaywrightComputer
+      | LocalPlaywrightComputer
+      | KernelPlaywrightComputer
+      | undefined;
+    tools?: ComputerTool[];
+    acknowledge_safety_check_callback?: (msg: string) => boolean;
+  }) {
+    this.model = opts.model ?? 'computer-use-preview';
+    this.computer = opts.computer;
+    this.tools = [...toolset.shared, ...(opts.tools ?? [])] as ComputerTool[];
+    this.ackCb = opts.acknowledge_safety_check_callback ?? (() => true);
 
-		if (computer) {
-			const dimensions = computer.getDimensions();
-			this.tools.push({
-				type: "computer-preview",
-				display_width: dimensions[0],
-				display_height: dimensions[1],
-				environment: computer.getEnvironment(),
-			});
-		}
-	}
+    if (this.computer) {
+      const [w, h] = this.computer.getDimensions();
+      this.tools.push({
+        type: 'computer_use_preview',
+        display_width: w,
+        display_height: h,
+        environment: this.computer.getEnvironment(),
+      });
+    }
+  }
 
-	private debugPrint(...args: any[]): void {
-		if (this.debug) {
-			console.warn("--- debug:agent:debugPrint");
-			console.dir(...args, { depth: null });
-		}
-	}
+  private debugPrint(...args: unknown[]): void {
+    if (this.debug) {
+      console.warn('--- debug:agent:debugPrint');
+      try {
+        console.dir(
+          args.map((msg) => utils.sanitizeMessage(msg as ResponseItem)),
+          { depth: null },
+        );
+      } catch (e) {
+        console.dir(args, { depth: null });
+      }
+    }
+  }
 
-	private async handleItem(item: Item): Promise<Item[]> {
-		/**Handle each item; may cause a computer action + screenshot.*/
-		if (item.type === "message") {
-			if (this.print_steps && item.content?.[0]?.text) {
-				console.log(item.content[0].text);
-			}
-		}
+  private async handleItem(item: ResponseItem): Promise<ResponseItem[]> {
+    if (item.type === 'message' && this.print_steps) {
+      const msg = item as ResponseOutputMessage;
+      const c = msg.content;
+      if (Array.isArray(c) && c[0] && 'text' in c[0] && typeof c[0].text === 'string')
+        console.log(c[0].text);
+    }
 
-		if (item.type === "function_call") {
-			const name = item.name!;
-			const args = JSON.parse(item.arguments!);
-			if (this.print_steps) {
-				console.log(`${name}(${JSON.stringify(args)})`);
-			}
+    if (item.type === 'function_call') {
+      const fc = item as ResponseFunctionToolCallItem;
+      const argsObj = JSON.parse(fc.arguments) as Record<string, unknown>;
+      if (this.print_steps) console.log(`${fc.name}(${JSON.stringify(argsObj)})`);
+      if (this.computer) {
+        const fn = (this.computer as unknown as Record<string, unknown>)[fc.name];
+        if (typeof fn === 'function')
+          await (fn as (...a: unknown[]) => unknown)(...Object.values(argsObj));
+      }
+      return [
+        {
+          type: 'function_call_output',
+          call_id: fc.call_id,
+          output: 'success',
+        } as unknown as ResponseFunctionToolCallOutputItem,
+      ];
+    }
 
-			if (this.computer && (this.computer as any)[name]) {
-				const method = (this.computer as any)[name];
-				await method.call(this.computer, ...Object.values(args));
-			}
-			return [
-				{
-					type: "function_call_output",
-					call_id: item.call_id!,
-					output: "success", // hard-coded output for demo
-				},
-			];
-		}
+    if (item.type === 'computer_call') {
+      const cc = item as ResponseComputerToolCall;
+      const { type: actionType, ...actionArgs } = cc.action;
+      if (this.print_steps) console.log(`${actionType}(${JSON.stringify(actionArgs)})`);
+      if (this.computer) {
+        const fn = (this.computer as unknown as Record<string, unknown>)[actionType as string];
+        if (typeof fn === 'function') {
+          await (fn as (...a: unknown[]) => unknown)(...Object.values(actionArgs));
+          const screenshot = await this.computer.screenshot();
+          const pending = cc.pending_safety_checks ?? [];
+          console.dir({ debug_agent_computer_call: cc });
+          for (const { message } of pending)
+            if (!this.ackCb(message)) throw new Error(`Safety check failed: ${message}`);
+          const out: Omit<ResponseComputerToolCallOutputItem, 'id'> = {
+            type: 'computer_call_output',
+            call_id: cc.call_id,
+            // id: "?", // <---- omitting to work - need to determine id source, != call_id
+            acknowledged_safety_checks: pending,
+            output: {
+              type: 'computer_screenshot',
+              image_url: `data:image/webp;base64,${screenshot}`,
+            },
+          };
+          if (this.computer.getEnvironment() === 'browser')
+            utils.checkBlocklistedUrl(this.computer.getCurrentUrl());
+          return [out as ResponseItem];
+        }
+      }
+    }
 
-		if (item.type === "computer_call") {
-			const action = item.action!;
-			const action_type = action.type;
-			const action_args = Object.fromEntries(
-				Object.entries(action).filter(([k]) => k !== "type"),
-			);
-			if (this.print_steps) {
-				console.log(`${action_type}(${JSON.stringify(action_args)})`);
-			}
+    return [];
+  }
 
-			if (this.computer) {
-				const method = (this.computer as any)[action_type];
-				await method.call(this.computer, ...Object.values(action_args));
+  async runFullTurn(opts: {
+    messages: ResponseInputItem[];
+    print_steps?: boolean;
+    debug?: boolean;
+    show_images?: boolean;
+  }): Promise<ResponseItem[]> {
+    this.print_steps = opts.print_steps ?? true;
+    this.debug = opts.debug ?? false;
+    this.show_images = opts.show_images ?? false;
+    const newItems: ResponseItem[] = [];
 
-				const screenshot_base64 = await this.computer.screenshot();
-				// console.dir({ debug: { screenshot_base64 }})
+    while (
+      newItems.length === 0 ||
+      (newItems[newItems.length - 1] as ResponseItem & { role?: string }).role !== 'assistant'
+    ) {
+      // Add current URL to system message if in browser environment
+      const inputMessages = [...opts.messages];
 
-				// if user doesn't ack all safety checks exit with error
-				const pending_checks = item.pending_safety_checks || [];
-				for (const check of pending_checks) {
-					const message = check.message;
-					if (!this.acknowledge_safety_check_callback(message)) {
-						throw new Error(
-							`Safety check failed: ${message}. Cannot continue with unacknowledged safety checks.`,
-						);
-					}
-				}
+      if (this.computer?.getEnvironment() === 'browser') {
+        const current_url = this.computer.getCurrentUrl();
+        // Find system message by checking if it has a role property with value 'system'
+        const sysIndex = inputMessages.findIndex((msg) => 'role' in msg && msg.role === 'system');
 
-				const call_output: ComputerCallOutput = {
-					type: "computer_call_output",
-					call_id: item.call_id!,
-					acknowledged_safety_checks: pending_checks,
-					output: {
-						type: "input_image",
-						image_url: `data:image/webp;base64,${screenshot_base64}`,
-					},
-				};
+        if (sysIndex >= 0) {
+          const msg = inputMessages[sysIndex];
+          const urlInfo = `\n- Current URL: ${current_url}`;
 
-				// additional URL safety checks for browser environments
-				if (this.computer.getEnvironment() === "browser") {
-					const current_url = this.computer.getCurrentUrl();
-					utils.checkBlocklistedUrl(current_url);
-					call_output.output.current_url = current_url;
-				}
+          // Create a properly typed message based on the original
+          if (msg && 'content' in msg) {
+            if (typeof msg.content === 'string') {
+              // Create a new message with the updated content
+              const updatedMsg = {
+                ...msg,
+                content: msg.content + urlInfo,
+              };
+              // Type assertion to ensure compatibility
+              inputMessages[sysIndex] = updatedMsg as typeof msg;
+            } else if (Array.isArray(msg.content) && msg.content.length > 0) {
+              // Handle array content case
+              const updatedContent = [...msg.content];
 
-				return [call_output];
-			}
-		}
-		return [];
-	}
+              // Check if first item has text property
+              if (updatedContent[0] && 'text' in updatedContent[0]) {
+                updatedContent[0] = {
+                  ...updatedContent[0],
+                  text: updatedContent[0].text + urlInfo,
+                };
+              }
 
-	async runFullTurn({
-		messages,
-		print_steps = true,
-		debug = false,
-		show_images = false,
-	}: {
-		messages: Item[];
-		print_steps?: boolean;
-		debug?: boolean;
-		show_images?: boolean;
-	}): Promise<Item[]> {
-		this.print_steps = print_steps;
-		this.debug = debug;
-		this.show_images = show_images;
-		const new_items: Item[] = [];
+              // Create updated message with new content
+              const updatedMsg = {
+                ...msg,
+                content: updatedContent,
+              };
+              // Type assertion to ensure compatibility
+              inputMessages[sysIndex] = updatedMsg as typeof msg;
+            }
+          }
+        }
+      }
 
-		// keep looping until we get a final response
-		while (
-			new_items.length === 0 ||
-			(new_items[new_items.length - 1]?.role !== "assistant")
-		) {
-			this.debugPrint(
-				messages.concat(new_items).map((msg) => utils.sanitizeMessage(msg)),
-			);
+      this.debugPrint(...inputMessages, ...newItems);
+      const response = await utils.createResponse({
+        model: this.model,
+        input: [...inputMessages, ...newItems],
+        tools: this.tools,
+        truncation: 'auto',
+      });
+      if (!response.output) throw new Error('No output from model');
+      for (const msg of response.output as ResponseItem[]) {
+        newItems.push(msg, ...(await this.handleItem(msg)));
+      }
+    }
 
-			const response = await utils.createResponse({
-				model: this.model,
-				input: messages.concat(new_items),
-				tools: this.tools,
-				truncation: "auto",
-			});
-			this.debugPrint(response);
-
-			if (!response.output && this.debug) {
-				console.log(response);
-				throw new Error("No output from model");
-			} else if (response.output) {
-				new_items.push(...response.output);
-				for (const item of response.output) {
-					const handled_items = await this.handleItem(item);
-					new_items.push(...handled_items);
-				}
-			}
-		}
-
-		// Return sanitized messages if show_images is false
-		if (!show_images) {
-			return new_items.map((msg) => utils.sanitizeMessage(msg));
-		}
-
-		return new_items;
-	}
+    // Return sanitized messages if show_images is false
+    return !this.show_images
+      ? newItems.map((msg) => utils.sanitizeMessage(msg) as ResponseItem)
+      : newItems;
+  }
 }
-
-export default { Agent };
