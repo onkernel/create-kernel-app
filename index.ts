@@ -73,7 +73,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   [TEMPLATE_COMPUTER_USE]: {
     name: "Computer Use",
     description: "Implements the Anthropic Computer Use SDK",
-    languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
+    languages: [LANGUAGE_PYTHON],
   },
   [TEMPLATE_CUA]: {
     name: "CUA Sample",
@@ -93,8 +93,6 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'kernel invoke ts-advanced test-captcha-solver',
-    [TEMPLATE_COMPUTER_USE]:
-      'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke ts-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
@@ -123,8 +121,6 @@ const REGISTERED_APP_NAMES: Record<
       'ts-stagehand',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'ts-advanced',
-    [TEMPLATE_COMPUTER_USE]:
-      'ts-cu',
     [TEMPLATE_CUA]:
       'ts-cua',
   },

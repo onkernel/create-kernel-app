@@ -114,9 +114,6 @@ kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com
 # Typescript + Stagehand
 kernel invoke ts-stagehand stagehand-task --payload '{"query": "Best wired earbuds"}'
 
-# Typescript + Computer Use
-kernel invoke ts-cu cu-task --payload '{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}'
-
 # Python + Sample App
 kernel invoke python-basic get-page-title --payload '{"url": "https://www.google.com"}'
 
