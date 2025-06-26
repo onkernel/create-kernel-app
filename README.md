@@ -19,6 +19,10 @@ A CLI tool to create the scaffolding for a  new Kernel applications. This tool h
   - Sample App: A basic template that extracts page titles using Playwright
   - Browser Use: A template implementing the Browser Use SDK
   - Stagehand: A template implementing the Stagehand SDK
+  - Advanced Sample: Implements sample apps using advanced Kernel configs
+  - Computer Use: Implements a prompt loop using Anthropic Computer Use (Python only)
+  - Anthropic Computer Use: Implements a prompt loop using Anthropic Computer Use (Typescript only)
+  - CUA: Implements a Computer Use Agent (OpenAI CUA) sample
 - ⚡️ Automatic dependency setup
 - 🫶 Interactive CLI
 
@@ -46,7 +50,8 @@ create-kernel-app [app-name] [options]
   - `browser-use`: Template with Browser Use SDK (Python only)
   - `stagehand`: Template with Stagehand SDK (Typescript only)
   - `advanced-sample`: Implements sample apps using advanced Kernel configs
-  - `computer-use`: Implements a prompt loop using Anthropic Computer Use
+  - `computer-use`: Implements a prompt loop using Anthropic Computer Use (Python only)
+  - `anthropic-computer-use`: Implements a prompt loop using Anthropic Computer Use (Typescript only)
   - `cua`: Implements a Computer Use Agent (OpenAI CUA) sample
 
 ### Examples
@@ -61,9 +66,9 @@ Create a Typescript application with Stagehand template:
 npx @onkernel/create-kernel-app my-app --language typescript --template stagehand
 ```
 
-Create a Typescript application with Computer Use template:
+Create a Typescript application with Anthropic Computer Use template:
 ```bash
-npx @onkernel/create-kernel-app my-app --language typescript --template computer-use
+npx @onkernel/create-kernel-app my-app --language typescript --template anthropic-computer-use
 ```
 
 Create a Python application with a sample app:
@@ -75,6 +80,10 @@ Create a Python application with Browser Use template:
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template browser-use
 ```
+
+Create a Python application with Computer Use template:
+```bash
+npx @onkernel/create-kernel-app my-app --language python --template computer-use
 ```
 
 ## Next Steps
@@ -101,7 +110,7 @@ export KERNEL_API_KEY=<YOUR_API_KEY>
 kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC_API_KEY=XXX if Computer Use
 
 # Python
-kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
+kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use or CUA; --env ANTHROPIC_API_KEY=XXX if Computer Use
 ```
 
 If deploying an app that requires environment variables, make sure to [set them](https://docs.onkernel.com/launch/deploy#environment-variables) when you `deploy`.
@@ -113,6 +122,9 @@ kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com
 
 # Typescript + Stagehand
 kernel invoke ts-stagehand stagehand-task --payload '{"query": "Best wired earbuds"}'
+
+# Typescript + Anthropic Computer Use
+kernel invoke ts-anthropic-cu computer-use-task --payload '{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}'
 
 # Python + Sample App
 kernel invoke python-basic get-page-title --payload '{"url": "https://www.google.com"}'
@@ -137,7 +149,8 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **browser-use** | Completes a specified task | Browser Use | `{ task }` |
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
 | **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
-| **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
+| **computer-use** | Implements a prompt loop | Anthropic Computer Use API (Python only) | `{ query }` |
+| **anthropic-computer-use** | Implements a prompt loop | Anthropic Computer Use API (Typescript only) | `{ query }` |
 | **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ task }` |
 
 ## Documentation

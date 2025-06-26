@@ -19,6 +19,7 @@ type TemplateKey =
   | "stagehand"
   | "advanced-sample"
   | "computer-use"
+  | "anthropic-computer-use"
   | "cua";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
@@ -35,6 +36,7 @@ const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
+const TEMPLATE_ANTHROPIC_COMPUTER_USE = "anthropic-computer-use";
 const TEMPLATE_CUA = "cua";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
@@ -75,6 +77,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements the Anthropic Computer Use SDK",
     languages: [LANGUAGE_PYTHON],
   },
+  [TEMPLATE_ANTHROPIC_COMPUTER_USE]: {
+    name: "Anthropic Computer Use",
+    description: "Implements the Anthropic Computer Use SDK with @onkernel/cu-playwright",
+    languages: [LANGUAGE_TYPESCRIPT],
+  },
   [TEMPLATE_CUA]: {
     name: "CUA Sample",
     description: "Implements a Computer Use Agent (OpenAI CUA) sample",
@@ -93,6 +100,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'kernel invoke ts-advanced test-captcha-solver',
+    [TEMPLATE_ANTHROPIC_COMPUTER_USE]:
+      'kernel invoke ts-anthropic-cu computer-use-task --payload \'{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke ts-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
@@ -121,6 +130,8 @@ const REGISTERED_APP_NAMES: Record<
       'ts-stagehand',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'ts-advanced',
+    [TEMPLATE_ANTHROPIC_COMPUTER_USE]:
+      'ts-anthropic-cu',
     [TEMPLATE_CUA]:
       'ts-cua',
   },
