@@ -5,7 +5,7 @@ import { ComputerUseAgent } from '@onkernel/cu-playwright';
 
 const kernel = new Kernel();
 
-const app = kernel.app('ts-anthropic-cu');
+const app = kernel.app('ts-claude-cu');
 
 interface QueryInput {
   query: string;
