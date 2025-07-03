@@ -104,7 +104,6 @@ export class Agent {
           await (fn as (...a: unknown[]) => unknown)(...Object.values(actionArgs));
           const screenshot = await this.computer.screenshot();
           const pending = cc.pending_safety_checks ?? [];
-          console.dir({ debug_agent_computer_call: cc });
           for (const { message } of pending)
             if (!this.ackCb(message)) throw new Error(`Safety check failed: ${message}`);
           const out: Omit<ResponseComputerToolCallOutputItem, 'id'> = {
