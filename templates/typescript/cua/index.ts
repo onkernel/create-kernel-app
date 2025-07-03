@@ -1,14 +1,24 @@
-import "dotenv/config";
-import { Kernel, type KernelContext } from "@onkernel/sdk";
-import { Agent } from "./lib/agent";
-import computers from "./lib/computers";
+import 'dotenv/config';
+import { Kernel, type KernelContext } from '@onkernel/sdk';
+import { Agent } from './lib/agent';
+import computers from './lib/computers';
+import type { ResponseOutputMessage, ResponseItem } from 'openai/resources/responses/responses';
+
+interface CuaInput {
+  task: string;
+}
+interface CuaOutput {
+  elapsed: number;
+  answer: string | null;
+  logs?: ResponseItem[];
+}
 
 const kernel = new Kernel();
-const app = kernel.app("ts-cua");
+const app = kernel.app('ts-cua');
 
-// LLM API Keys are set in the environment during `kernel deploy <filename> -e ANTHROPIC_API_KEY=XXX`
-// See https://docs.onkernel.com/launch/deploy#environment-variables
-if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not set');
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY is not set');
+}
 
 /**
  * Example app that run an agent using openai CUA
@@ -24,88 +34,74 @@ if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not set');
  *  kernel logs ts-cua -f # Open in separate tab
  */
 
-interface CuaInput {
-	task: string;
-}
-
-interface CuaOutput {
-	elapsed: number;
-	response?: Array<object>;
-	answer: object;
-}
-
 app.action<CuaInput, CuaOutput>(
-	"cua-task",
-	async (ctx: KernelContext, payload?: CuaInput): Promise<CuaOutput> => {
-		const startTime = Date.now();
-		const kernelBrowser = await kernel.browsers.create({
-			invocation_id: ctx.invocation_id,
-		});
-		console.log(
-			"> Kernel browser live view url: ",
-			kernelBrowser.browser_live_view_url,
-		);
+  'cua-task',
+  async (ctx: KernelContext, payload?: CuaInput): Promise<CuaOutput> => {
+    const start = Date.now();
+    if (!payload?.task) throw new Error('task is required');
 
-		if (!payload?.task){
-			throw new Error('task is required');
-		}
+    try {
+      const kb = await kernel.browsers.create({ invocation_id: ctx.invocation_id });
+      console.log('> Kernel browser live view url:', kb.browser_live_view_url);
 
-		try {
+      const { computer } = await computers.create({ type: 'kernel', cdp_ws_url: kb.cdp_ws_url });
+      const agent = new Agent({
+        model: 'computer-use-preview',
+        computer,
+        tools: [],
+        acknowledge_safety_check_callback: (m: string): boolean => {
+          console.log(`> safety check: ${m}`);
+          return true;
+        },
+      });
 
-			// kernel browser
-			const { computer } = await computers.create({
-				type: "kernel", // for local testing before deploying to Kernel, you can use type: "local"
-				cdp_ws_url: kernelBrowser.cdp_ws_url,
-			});
+      // run agent and get response
+      const logs = await agent.runFullTurn({
+        messages: [
+          {
+            role: 'system',
+            content: `- Current date and time: ${new Date().toISOString()} (${new Date().toLocaleDateString(
+              'en-US',
+              { weekday: 'long' },
+            )})`,
+          },
+          {
+            type: 'message',
+            role: 'user',
+            content: [{ type: 'input_text', text: payload.task }],
+          },
+        ],
+        print_steps: true,
+        debug: true,
+        show_images: false,
+      });
 
-			// setup agent
-			const agent = new Agent({
-				model: "computer-use-preview",
-				computer,
-				tools: [], // additional function_call tools to provide to the llm
-				acknowledge_safety_check_callback: (message: string) => {
-					console.log(`> safety check: ${message}`);
-					return true; // Auto-acknowledge all safety checks for testing
-				},
-			});
+      const elapsed = parseFloat(((Date.now() - start) / 1000).toFixed(2));
 
-			// start agent run
-			const response = await agent.runFullTurn({
-				messages: [
-					{
-						role: "system",
-						content: `- Current date and time: ${new Date().toISOString()} (${new Date().toLocaleDateString("en-US", { weekday: "long" })})`,
-					},
-					{
-						type: "message",
-						role: "user",
-						content: [
-							{
-								type: "input_text",
-								text: payload.task,
-								// text: "go to https://news.ycombinator.com , open top article , describe the target website design (in yaml format)"
-							},
-						],
-					},
-				],
-				print_steps: true, // log function_call and computer_call actions
-				debug: true, // show agent debug logs (llm messages and responses)
-				show_images: false, // if set to true, response messages stack will return base64 images (webp format) of screenshots, if false, replaced with "[omitted]""
-			});
+      // filter only LLM messages
+      const messages = logs.filter(
+        (item): item is ResponseOutputMessage =>
+          item.type === 'message' &&
+          typeof (item as ResponseOutputMessage).role === 'string' &&
+          Array.isArray((item as ResponseOutputMessage).content),
+      );
+      const assistant = messages.find((m) => m.role === 'assistant');
+      const lastContentIndex = assistant?.content?.length ? assistant.content.length - 1 : -1;
+      const lastContent = lastContentIndex >= 0 ? assistant?.content?.[lastContentIndex] : null;
+      const answer = lastContent && 'text' in lastContent ? lastContent.text : null;
 
-			console.log("> agent run done");
-
-			const endTime = Date.now();
-			const timeElapsed = (endTime - startTime) / 1000; // Convert to seconds
-
-			return {
-				// response, // full messages stack trace
-				elapsed: parseFloat(timeElapsed.toFixed(2)),
-				answer: response?.slice(-1)?.[0]?.content?.[0]?.text ?? null,
-			};
-		} finally {
-			// Note: KernelPlaywrightComputer handles browser cleanup internally
-			// No need to manually close browser here
-		}
-	},
+      return {
+        // logs, // optionally, get the full agent run messages logs
+        elapsed,
+        answer,
+      };
+    } catch (error) {
+      const elapsed = parseFloat(((Date.now() - start) / 1000).toFixed(2));
+      console.error('Error in cua-task:', error);
+      return {
+        elapsed,
+        answer: null,
+      };
+    }
+  },
 );

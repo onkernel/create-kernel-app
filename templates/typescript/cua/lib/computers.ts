@@ -1,25 +1,28 @@
-import { KernelPlaywrightComputer } from "./playwright/kernel.ts";
-import { LocalPlaywrightComputer } from "./playwright/local.ts";
+import { KernelPlaywrightComputer } from './playwright/kernel';
+import { LocalPlaywrightComputer } from './playwright/local';
 
-interface ComputerConfig {
-	type: "local" | "kernel";
-	[key: string]: any;
+interface KernelConfig {
+  type: 'kernel';
+  cdp_ws_url: string;
 }
+interface LocalConfig {
+  type: 'local';
+  headless?: boolean;
+}
+type ComputerConfig = KernelConfig | LocalConfig;
 
-const computers = {
-	async create({ type, ...args }: ComputerConfig) {
-		if (type === "kernel") {
-			const computer = new KernelPlaywrightComputer(args.cdp_ws_url);
-			await computer.enter();
-			return { computer };
-		} else if (type === "local") {
-			const computer = new LocalPlaywrightComputer(args.headless);
-			await computer.enter();
-			return { computer };
-		} else {
-			throw new Error(`Unknown computer type: ${type}`);
-		}
-	},
+export default {
+  async create(
+    cfg: ComputerConfig,
+  ): Promise<{ computer: KernelPlaywrightComputer | LocalPlaywrightComputer }> {
+    if (cfg.type === 'kernel') {
+      const computer = new KernelPlaywrightComputer(cfg.cdp_ws_url);
+      await computer.enter();
+      return { computer };
+    } else {
+      const computer = new LocalPlaywrightComputer(cfg.headless ?? false);
+      await computer.enter();
+      return { computer };
+    }
+  },
 };
-
-export default computers;

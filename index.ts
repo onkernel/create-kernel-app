@@ -96,7 +96,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
-      'kernel invoke ts-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
+      'kernel invoke ts-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -108,7 +108,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
-      'kernel invoke python-cua cua-task --payload \'{"query": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
+      'kernel invoke python-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
 };
 
