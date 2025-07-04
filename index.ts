@@ -388,7 +388,6 @@ function printNextSteps(
 Next steps:
   brew install onkernel/tap/kernel
   cd ${appName}
-  # Request early access for an API key: https://waitlist.onkernel.com/r/mZW2zz
   export KERNEL_API_KEY=<YOUR_API_KEY>
   ${deployCommand}
   ${INVOKE_SAMPLES[language][template]}
