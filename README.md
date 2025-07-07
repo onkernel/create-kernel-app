@@ -46,7 +46,7 @@ create-kernel-app [app-name] [options]
   - `browser-use`: Template with Browser Use SDK (Python only)
   - `stagehand`: Template with Stagehand SDK (Typescript only)
   - `advanced-sample`: Implements sample apps using advanced Kernel configs
-  - `computer-use`: Implements a prompt loop using Anthropic Computer Use
+  - `claude-cu`: Implements a prompt loop using Anthropic Computer Use
   - `cua`: Implements a Computer Use Agent (OpenAI CUA) sample
 
 ### Examples
@@ -61,9 +61,9 @@ Create a Typescript application with Stagehand template:
 npx @onkernel/create-kernel-app my-app --language typescript --template stagehand
 ```
 
-Create a Typescript application with Computer Use template:
+Create a Typescript application with Claude Computer Use template:
 ```bash
-npx @onkernel/create-kernel-app my-app --language typescript --template computer-use
+npx @onkernel/create-kernel-app my-app --language typescript --template claude-cu
 ```
 
 Create a Python application with a sample app:
@@ -75,6 +75,10 @@ Create a Python application with Browser Use template:
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template browser-use
 ```
+
+Create a Python application with Claude Computer Use template:
+```bash
+npx @onkernel/create-kernel-app my-app --language python --template claude-cu
 ```
 
 ## Next Steps
@@ -98,10 +102,10 @@ export KERNEL_API_KEY=<YOUR_API_KEY>
 4. Deploy your application:
 ```bash
 # Typscript
-kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC_API_KEY=XXX if Computer Use
+kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC_API_KEY=XXX if Claude Computer Use
 
 # Python
-kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
+kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use; --env ANTHROPIC_API_KEY=XXX if Claude Computer Use
 ```
 
 If deploying an app that requires environment variables, make sure to [set them](https://docs.onkernel.com/launch/deploy#environment-variables) when you `deploy`.
@@ -114,14 +118,17 @@ kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com
 # Typescript + Stagehand
 kernel invoke ts-stagehand stagehand-task --payload '{"query": "Best wired earbuds"}'
 
-# Typescript + Computer Use
-kernel invoke ts-cu cu-task --payload '{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}'
+# Typescript + Claude Computer Use
+kernel invoke ts-claude-cu computer-use-query --payload '{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}'
 
 # Python + Sample App
 kernel invoke python-basic get-page-title --payload '{"url": "https://www.google.com"}'
 
 # Python + Browser Use
 kernel invoke python-bu bu-task --payload '{"task": "Compare the price of gpt-4o and DeepSeek-V3"}'
+
+# Python + Claude Computer Use
+kernel invoke python-claude-cu cu-task --payload '{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}'
 
 # Typescript + CUA Sample
 kernel invoke ts-cua cua-task --payload '{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}'
@@ -140,7 +147,7 @@ These are the sample apps currently available when you run `npx @onkernel/create
 | **browser-use** | Completes a specified task | Browser Use | `{ task }` |
 | **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
 | **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
-| **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
+| **claude-cu** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
 | **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ task }` |
 
 ## Documentation

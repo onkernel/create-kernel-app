@@ -18,7 +18,7 @@ type TemplateKey =
   | "browser-use"
   | "stagehand"
   | "advanced-sample"
-  | "computer-use"
+  | "claude-cu"
   | "cua";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
@@ -34,7 +34,8 @@ const TEMPLATE_SAMPLE_APP = "sample-app";
 const TEMPLATE_BROWSER_USE = "browser-use";
 const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
-const TEMPLATE_COMPUTER_USE = "computer-use";
+const TEMPLATE_COMPUTER_USE = "claude-cu";
+const TEMPLATE_ANTHROPIC_COMPUTER_USE = "claude-cu";
 const TEMPLATE_CUA = "cua";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
@@ -70,8 +71,8 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
       "Implements sample actions with advanced Kernel configs",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
-  [TEMPLATE_COMPUTER_USE]: {
-    name: "Computer Use",
+  ["claude-cu"]: {
+    name: "Claude Computer Use",
     description: "Implements the Anthropic Computer Use SDK",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
@@ -93,8 +94,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'kernel invoke ts-advanced test-captcha-solver',
-    [TEMPLATE_COMPUTER_USE]:
-      'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
+    ["claude-cu"]:
+      'kernel invoke ts-claude-cu computer-use-query --payload \'{"query": "Search for the top 3 restaurants in NYC according to Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke ts-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
@@ -105,8 +106,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'kernel invoke python-advanced test-captcha-solver',
-    [TEMPLATE_COMPUTER_USE]:
-      'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
+    ["claude-cu"]:
+      'kernel invoke python-claude-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke python-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
@@ -123,8 +124,8 @@ const REGISTERED_APP_NAMES: Record<
       'ts-stagehand',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'ts-advanced',
-    [TEMPLATE_COMPUTER_USE]:
-      'ts-cu',
+    ["claude-cu"]:
+      'ts-claude-cu',
     [TEMPLATE_CUA]:
       'ts-cua',
   },
@@ -135,8 +136,8 @@ const REGISTERED_APP_NAMES: Record<
       'python-bu',
     [TEMPLATE_ADVANCED_SAMPLE]:
       'python-advanced',
-    [TEMPLATE_COMPUTER_USE]:
-      'python-cu',
+    ["claude-cu"]:
+      'python-claude-cu',
     [TEMPLATE_CUA]:
       'python-cua',
   },
