@@ -44,8 +44,8 @@ async def cu_task(
     try:
         async with async_playwright() as playwright:
             browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
-            context_obj = browser.contexts[0]
-            page = context_obj.pages[0]
+            context = browser.contexts[0] if browser.contexts else await browser.new_context()
+            page = context.pages[0] if context.pages else await context.new_page()
 
             # Run the sampling loop
             final_messages = await sampling_loop(

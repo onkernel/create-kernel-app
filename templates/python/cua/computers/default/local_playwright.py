@@ -23,12 +23,13 @@ class LocalPlaywrightBrowser(BasePlaywrightComputer):
             env={"DISPLAY": ":0"},
         )
 
-        context = browser.new_context()
+        context = browser.contexts[0] if browser.contexts else browser.new_context()
+
 
         # Add event listeners for page creation and closure
         context.on("page", self._handle_new_page)
 
-        page = context.new_page()
+        page = context.pages[0] if context.pages else context.new_page()
         page.set_viewport_size({"width": width, "height": height})
         page.on("close", self._handle_page_close)
 
