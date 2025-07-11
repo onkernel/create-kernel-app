@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from browser_use.llm import ChatOpenAI
 from browser_use import Agent
 import kernel
 from kernel import Kernel
@@ -14,7 +14,7 @@ class TaskInput(TypedDict):
     
 # LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
 # See https://docs.onkernel.com/launch/deploy#environment-variables
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-4.1")
 
 @app.action("bu-task")
 async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
