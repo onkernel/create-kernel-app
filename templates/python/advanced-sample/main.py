@@ -32,10 +32,8 @@ async def test_captcha_solver(ctx: kernel.KernelContext) -> None:
         browser = await playwright.chromium.connect_over_cdp(kernel_browser.cdp_ws_url)
         
         # Get or create context and page
-        contexts = browser.contexts
-        context = contexts[0] if contexts else await browser.new_context()
-        pages = context.pages
-        page = pages[0] if pages else await context.new_page()
+        context = browser.contexts[0] if browser.contexts else await browser.new_context()
+        page = context.pages[0] if context.pages else await context.new_page()
         
         # Access the live view. Retrieve this live_view_url from the Kernel logs in your CLI:
         # export KERNEL_API_KEY=<Your API key>

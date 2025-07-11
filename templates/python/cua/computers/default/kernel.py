@@ -23,14 +23,7 @@ class KernelPlaywrightBrowser(BasePlaywrightComputer):
     def _get_browser_and_page(self) -> tuple[Browser, Page]:
         # Connect to the remote browser using the CDP URL
         browser = self._playwright.chromium.connect_over_cdp(self.cdp_ws_url)
-        # Use the first context or create one if none exists
-        if browser.contexts:
-            context = browser.contexts[0]
-        else:
-            context = browser.new_context()
-        # Add event listeners for page creation and closure
-        context.on("page", self._handle_new_page)
-        # Create a new page and set viewport
+        context = browser.contexts[0] if browser.contexts else browser.new_context()
         page = context.pages[0] if context.pages else context.new_page()
         page.set_viewport_size({"width": self.width, "height": self.height})
         page.on("close", self._handle_page_close)
