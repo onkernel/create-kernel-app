@@ -1,5 +1,9 @@
 name: Nightly SDK Version Bump
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   schedule:
     - cron: "0 3 * * *" # 03:00 UTC every night
