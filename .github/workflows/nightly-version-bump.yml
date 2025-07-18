@@ -1,0 +1,45 @@
+name: Nightly SDK Version Bump
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC every night
+  workflow_dispatch: {}
+
+jobs:
+  bump:
+    name: Update SDK versions and create PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Python dependencies for script
+        run: pip install requests
+
+      - name: Run update_versions.py
+        run: python scripts/update_versions.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump kernel sdk versions to latest"
+          title: "chore: nightly SDK version bump"
+          body: |
+            This PR updates Python `kernel` and TypeScript `@onkernel/sdk` version constraints to the latest published releases.
+          branch: "github-actions/nightly-sdk-bump"
+          signoff: false
+          delete-branch: true 
