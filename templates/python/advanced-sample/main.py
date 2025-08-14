@@ -15,7 +15,7 @@ Returns:
     None
     
 Invoke this via CLI:
-    export KERNEL_API_KEY=<your_api_key>
+    kernel login
     kernel deploy main.py  # If you haven't already deployed this app
     kernel invoke py-advanced test_captcha_solver
     kernel logs py-advanced -f  # Open in separate tab
@@ -36,7 +36,7 @@ async def test_captcha_solver(ctx: kernel.KernelContext) -> None:
         page = context.pages[0] if context.pages else await context.new_page()
         
         # Access the live view. Retrieve this live_view_url from the Kernel logs in your CLI:
-        # export KERNEL_API_KEY=<Your API key>
+        # kernel login
         # kernel logs py-advanced --follow
         print("Kernel browser live view url: ", kernel_browser.browser_live_view_url)
         
