@@ -13,7 +13,7 @@ const app = kernel.app("ts-basic");
  * Returns:
  *     A dictionary containing the page title
  * Invoke this via CLI:
- *  kernel login
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
  *  kernel invoke ts-basic get-page-title -p '{"url": "https://www.google.com"}'
  *  kernel logs ts-basic -f # Open in separate tab
@@ -85,7 +85,7 @@ app.action<PageTitleInput, PageTitleOutput>(
  * Returns:
  *     A dictionary containing the browser live view url
  * Invoke this via CLI:
- *  kernel login
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
  *  kernel invoke ts-basic create-persisted-browser
  *  kernel logs ts-basic -f # Open in separate tab

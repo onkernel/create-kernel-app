@@ -379,11 +379,11 @@ function printNextSteps(
 Next steps:
   brew install onkernel/tap/kernel
   cd ${appName}
-  kernel login
+  kernel login  # or: export KERNEL_API_KEY=<YOUR_API_KEY>
   ${deployCommand}
   ${INVOKE_SAMPLES[language][template]}
   # Do this in a separate tab
-  kernel login
+  kernel login  # or: export KERNEL_API_KEY=<YOUR_API_KEY>
   kernel logs ${REGISTERED_APP_NAMES[language][template]} --follow
   `)
   );

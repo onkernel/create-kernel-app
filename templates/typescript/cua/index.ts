@@ -28,7 +28,7 @@ if (!process.env.OPENAI_API_KEY) {
  * Returns:
  *     An answer to the task, elapsed time and optionally the messages stack
  * Invoke this via CLI:
- *  kernel login
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts -e OPENAI_API_KEY=XXXXX --force
  *  kernel invoke ts-cua cua-task -p "{\"task\":\"current market price range for a used dreamcast\"}"
  *  kernel logs ts-cua -f # Open in separate tab

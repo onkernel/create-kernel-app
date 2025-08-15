@@ -15,7 +15,7 @@ const app = kernel.app("ts-advanced");
  *     None
  *
  * Invoke this via CLI:
- *  kernel login
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
  *  kernel invoke ts-advanced test-captcha-solver
  *  kernel logs ts-advanced -f # Open in separate tab
@@ -31,7 +31,7 @@ app.action("test-captcha-solver", async (ctx: KernelContext): Promise<void> => {
   const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
 
   // Access the live view. Retrieve this live_view_url from the Kernel logs in your CLI:
-  // kernel login
+  // kernel login  # or: export KERNEL_API_KEY=<Your API key>
   // kernel logs ts-advanced --follow
   console.log(
     "Kernel browser live view url: ",
