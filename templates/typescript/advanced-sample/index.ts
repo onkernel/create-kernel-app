@@ -39,8 +39,8 @@ app.action("test-captcha-solver", async (ctx: KernelContext): Promise<void> => {
   );
 
   // Navigate to a site with a CAPTCHA
-  const context = (await browser.contexts()[0]) || (await browser.newContext());
-  const page = (await context.pages()[0]) || (await context.newPage());
+  const context = browser.contexts()[0] || (await browser.newContext());
+  const page = context.pages()[0] || (await context.newPage());
   await page.waitForTimeout(10000); // Add a delay to give you time to visit the live view url
   await page.goto("https://www.google.com/recaptcha/api2/demo");
   // Watch Kernel auto-solve the CAPTCHA!

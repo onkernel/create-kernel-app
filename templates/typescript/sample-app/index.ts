@@ -59,9 +59,8 @@ app.action<PageTitleInput, PageTitleOutput>(
     );
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
-    const context =
-      (await browser.contexts()[0]) || (await browser.newContext());
-    const page = (await context.pages()[0]) || (await context.newPage());
+    const context = browser.contexts()[0] || (await browser.newContext());
+    const page = context.pages()[0] || (await context.newPage());
 
     try {
       //////////////////////////////////////
