@@ -66,8 +66,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   },
   [TEMPLATE_ADVANCED_SAMPLE]: {
     name: "Advanced Samples",
-    description:
-      "Implements sample actions with advanced Kernel configs",
+    description: "Implements sample actions with advanced Kernel configs",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
   [TEMPLATE_COMPUTER_USE]: {
@@ -91,8 +90,7 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
     [TEMPLATE_STAGEHAND]:
       'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
-    [TEMPLATE_ADVANCED_SAMPLE]:
-      'kernel invoke ts-advanced test-captcha-solver',
+    [TEMPLATE_ADVANCED_SAMPLE]: "kernel invoke ts-advanced test-captcha-solver",
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
@@ -104,7 +102,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_BROWSER_USE]:
       'kernel invoke python-bu bu-task --payload \'{"task": "Compare the price of gpt-4o and DeepSeek-V3"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]:
-      'kernel invoke python-advanced test-captcha-solver',
+      "kernel invoke python-advanced test-captcha-solver",
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
@@ -117,28 +115,18 @@ const REGISTERED_APP_NAMES: Record<
   Partial<Record<TemplateKey, string>>
 > = {
   [LANGUAGE_TYPESCRIPT]: {
-    [TEMPLATE_SAMPLE_APP]:
-      'ts-basic',
-    [TEMPLATE_STAGEHAND]:
-      'ts-stagehand',
-    [TEMPLATE_ADVANCED_SAMPLE]:
-      'ts-advanced',
-    [TEMPLATE_COMPUTER_USE]:
-      'ts-cu',
-    [TEMPLATE_CUA]:
-      'ts-cua',
+    [TEMPLATE_SAMPLE_APP]: "ts-basic",
+    [TEMPLATE_STAGEHAND]: "ts-stagehand",
+    [TEMPLATE_ADVANCED_SAMPLE]: "ts-advanced",
+    [TEMPLATE_COMPUTER_USE]: "ts-cu",
+    [TEMPLATE_CUA]: "ts-cua",
   },
   [LANGUAGE_PYTHON]: {
-    [TEMPLATE_SAMPLE_APP]:
-      'python-basic',
-    [TEMPLATE_BROWSER_USE]:
-      'python-bu',
-    [TEMPLATE_ADVANCED_SAMPLE]:
-      'python-advanced',
-    [TEMPLATE_COMPUTER_USE]:
-      'python-cu',
-    [TEMPLATE_CUA]:
-      'python-cua',
+    [TEMPLATE_SAMPLE_APP]: "python-basic",
+    [TEMPLATE_BROWSER_USE]: "python-bu",
+    [TEMPLATE_ADVANCED_SAMPLE]: "python-advanced",
+    [TEMPLATE_COMPUTER_USE]: "python-cu",
+    [TEMPLATE_CUA]: "python-cua",
   },
 };
 
@@ -311,14 +299,14 @@ function copyTemplateFiles(
   fs.copySync(templatePath, appPath, {
     filter: (src, dest) => {
       const filename = path.basename(src);
-      if (filename === '_gitignore') {
+      if (filename === "_gitignore") {
         fs.copyFileSync(src, dest);
         // Rename it to .gitignore
-        fs.renameSync(dest, path.join(path.dirname(dest), '.gitignore'));
+        fs.renameSync(dest, path.join(path.dirname(dest), ".gitignore"));
         return false; // Skip the original copy since we handled it
       }
       return true; // Copy all other files normally
-    }
+    },
   });
 }
 
@@ -363,7 +351,8 @@ function printNextSteps(
 ): void {
   // Determine which sample command to show based on language and template
   const deployCommand =
-    language === LANGUAGE_TYPESCRIPT && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
+    language === LANGUAGE_TYPESCRIPT &&
+    (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
       ? "kernel deploy index.ts"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_STAGEHAND
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
@@ -371,7 +360,9 @@ function printNextSteps(
       ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_CUA
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
-      : language === LANGUAGE_PYTHON && (template === TEMPLATE_SAMPLE_APP || template === TEMPLATE_ADVANCED_SAMPLE)
+      : language === LANGUAGE_PYTHON &&
+        (template === TEMPLATE_SAMPLE_APP ||
+          template === TEMPLATE_ADVANCED_SAMPLE)
       ? "kernel deploy main.py"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_BROWSER_USE
       ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
@@ -388,11 +379,11 @@ function printNextSteps(
 Next steps:
   brew install onkernel/tap/kernel
   cd ${appName}
-  export KERNEL_API_KEY=<YOUR_API_KEY>
+  kernel login  # or: export KERNEL_API_KEY=<YOUR_API_KEY>
   ${deployCommand}
   ${INVOKE_SAMPLES[language][template]}
   # Do this in a separate tab
-  export KERNEL_API_KEY=<YOUR_API_KEY>
+  kernel login  # or: export KERNEL_API_KEY=<YOUR_API_KEY>
   kernel logs ${REGISTERED_APP_NAMES[language][template]} --follow
   `)
   );

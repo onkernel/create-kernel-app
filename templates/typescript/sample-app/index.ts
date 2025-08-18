@@ -1,9 +1,9 @@
-import { Kernel, type KernelContext } from '@onkernel/sdk';
-import { chromium } from 'playwright';
+import { Kernel, type KernelContext } from "@onkernel/sdk";
+import { chromium } from "playwright";
 
 const kernel = new Kernel();
 
-const app = kernel.app('ts-basic');
+const app = kernel.app("ts-basic");
 
 /**
  * Example app that extracts the title of a webpage
@@ -13,7 +13,7 @@ const app = kernel.app('ts-basic');
  * Returns:
  *     A dictionary containing the page title
  * Invoke this via CLI:
- *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
  *  kernel invoke ts-basic get-page-title -p '{"url": "https://www.google.com"}'
  *  kernel logs ts-basic -f # Open in separate tab
@@ -26,13 +26,19 @@ interface PageTitleOutput {
   title: string;
 }
 app.action<PageTitleInput, PageTitleOutput>(
-  'get-page-title',
-  async (ctx: KernelContext, payload?: PageTitleInput): Promise<PageTitleOutput> => {
+  "get-page-title",
+  async (
+    ctx: KernelContext,
+    payload?: PageTitleInput
+  ): Promise<PageTitleOutput> => {
     if (!payload?.url) {
-      throw new Error('URL is required');
+      throw new Error("URL is required");
     }
-    
-    if (!payload.url.startsWith('http://') && !payload.url.startsWith('https://')) {
+
+    if (
+      !payload.url.startsWith("http://") &&
+      !payload.url.startsWith("https://")
+    ) {
       payload.url = `https://${payload.url}`;
     }
 
@@ -47,11 +53,14 @@ app.action<PageTitleInput, PageTitleOutput>(
       invocation_id: ctx.invocation_id,
     });
 
-    console.log("Kernel browser live view url: ", kernelBrowser.browser_live_view_url);
+    console.log(
+      "Kernel browser live view url: ",
+      kernelBrowser.browser_live_view_url
+    );
 
     const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
-    const context = await browser.contexts()[0] || (await browser.newContext());
-    const page = await context.pages()[0] || (await context.newPage());
+    const context = browser.contexts()[0] || (await browser.newContext());
+    const page = context.pages()[0] || (await context.newPage());
 
     try {
       //////////////////////////////////////
@@ -63,7 +72,7 @@ app.action<PageTitleInput, PageTitleOutput>(
     } finally {
       await browser.close();
     }
-  },
+  }
 );
 
 /**
@@ -75,7 +84,7 @@ app.action<PageTitleInput, PageTitleOutput>(
  * Returns:
  *     A dictionary containing the browser live view url
  * Invoke this via CLI:
- *  export KERNEL_API_KEY=<your_api_key>
+ *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
  *  kernel invoke ts-basic create-persisted-browser
  *  kernel logs ts-basic -f # Open in separate tab
@@ -83,9 +92,9 @@ app.action<PageTitleInput, PageTitleOutput>(
 interface CreatePersistedBrowserOutput {
   browser_live_view_url: string;
 }
-app.action("create-persisted-browser",
+app.action(
+  "create-persisted-browser",
   async (ctx: KernelContext): Promise<CreatePersistedBrowserOutput> => {
-
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
       persistence: {

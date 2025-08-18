@@ -17,7 +17,7 @@ Args:
 Returns:
     A dictionary containing the page title
 Invoke this via CLI:
-    export KERNEL_API_KEY=<your_api_key>
+    kernel login  # or: export KERNEL_API_KEY=<your_api_key>
     kernel deploy main.py # If you haven't already deployed this app
     kernel invoke python-basic get-page-title -p '{"url": "https://www.google.com"}'
     kernel logs python-basic -f # Open in separate tab
@@ -74,7 +74,7 @@ Args:
 Returns:
     A dictionary containing the browser live view url
 Invoke this via CLI:
-    export KERNEL_API_KEY=<your_api_key>
+    kernel login  # or: export KERNEL_API_KEY=<your_api_key>
     kernel deploy main.py # If you haven't already deployed this app
     kernel invoke python-basic create-persisted-browser
     kernel logs python-basic -f # Open in separate tab

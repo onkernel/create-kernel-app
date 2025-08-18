@@ -7,7 +7,7 @@
   <a href="https://x.com/rfgarcia"><img src="https://img.shields.io/twitter/follow/rfgarcia" alt="Follow @rfgarcia"></a>
 </p>
 
-A CLI tool to create the scaffolding for a  new Kernel applications. This tool helps you get started with building browser automation applications using Kernel's platform.
+A CLI tool to create the scaffolding for a new Kernel applications. This tool helps you get started with building browser automation applications using Kernel's platform.
 
 ## Features
 
@@ -52,30 +52,36 @@ create-kernel-app [app-name] [options]
 ### Examples
 
 Create a TypeScript application with a sample app:
+
 ```bash
 npx @onkernel/create-kernel-app my-app --language typescript --template sample-app
 ```
 
 Create a Typescript application with Stagehand template:
+
 ```bash
 npx @onkernel/create-kernel-app my-app --language typescript --template stagehand
 ```
 
 Create a Typescript application with Computer Use template:
+
 ```bash
 npx @onkernel/create-kernel-app my-app --language typescript --template computer-use
 ```
 
 Create a Python application with a sample app:
+
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template sample-app
 ```
 
 Create a Python application with Browser Use template:
+
 ```bash
 npx @onkernel/create-kernel-app my-app --language python --template browser-use
 ```
-```
+
+````
 
 ## Next Steps
 
@@ -84,18 +90,21 @@ After creating your application:
 1. Navigate to your project directory:
 ```bash
 cd my-app
-```
+````
 
 2. Set up your environment:
+
 - For TypeScript: `npm install`
 - For Python: `uv venv && source .venv/bin/activate && uv sync`
 
 3. Set your Kernel API key:
+
 ```bash
-export KERNEL_API_KEY=<YOUR_API_KEY>
+kernel login  # or: export KERNEL_API_KEY=<YOUR_API_KEY>
 ```
 
 4. Deploy your application:
+
 ```bash
 # Typscript
 kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC_API_KEY=XXX if Computer Use
@@ -107,6 +116,7 @@ kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
 If deploying an app that requires environment variables, make sure to [set them](https://docs.onkernel.com/launch/deploy#environment-variables) when you `deploy`.
 
 5. Invoke your application:
+
 ```bash
 # Typescript + Sample App
 kernel invoke ts-basic get-page-title --payload '{"url": "https://www.google.com"}'
@@ -134,18 +144,19 @@ kernel invoke python-cua cua-task --payload '{"task": "Get current market price 
 
 These are the sample apps currently available when you run `npx @onkernel/create-kernel-app`:
 
-| Template | Description | Framework | Query Parameters |
-|----------|-------------|-----------|------------------|
-| **sample-app** | Returns the page title of a specified URL | Playwright | `{ url }` |
-| **browser-use** | Completes a specified task | Browser Use | `{ task }` |
-| **stagehand** | Returns the first result of a specified Google search | Stagehand | `{ query }` |
-| **advanced-sample** | Implements sample apps using advanced Kernel configs | n/a |
-| **computer-use** | Implements a prompt loop | Anthropic Computer Use API | `{ query }` |
-| **cua** | Implements the OpenAI Computer Using Agent (CUA) | OpenAI CUA | `{ task }` |
+| Template            | Description                                           | Framework                  | Query Parameters |
+| ------------------- | ----------------------------------------------------- | -------------------------- | ---------------- |
+| **sample-app**      | Returns the page title of a specified URL             | Playwright                 | `{ url }`        |
+| **browser-use**     | Completes a specified task                            | Browser Use                | `{ task }`       |
+| **stagehand**       | Returns the first result of a specified Google search | Stagehand                  | `{ query }`      |
+| **advanced-sample** | Implements sample apps using advanced Kernel configs  | n/a                        |
+| **computer-use**    | Implements a prompt loop                              | Anthropic Computer Use API | `{ query }`      |
+| **cua**             | Implements the OpenAI Computer Using Agent (CUA)      | OpenAI CUA                 | `{ task }`       |
 
 ## Documentation
 
 For more information about Kernel and its features, visit:
+
 - [Kernel Documentation](https://docs.onkernel.com/quickstart)
 - [Kernel Homepage](https://onkernel.com)
 
@@ -156,4 +167,3 @@ Contributions are welcome! Please feel free to submit a pull request. See [Contr
 ## License
 
 MIT © [Kernel](https://onkernel.com)
-

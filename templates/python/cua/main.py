@@ -15,7 +15,7 @@ Args:
 Returns:
     An answer to the task, elapsed time and optionally the messages stack
 Invoke this via CLI:
-    export KERNEL_API_KEY=<your_api_key>
+    kernel login  # or: export KERNEL_API_KEY=<your_api_key>
     kernel deploy main.py -e OPENAI_API_KEY=XXXXX --force
     kernel invoke python-cua cua-task -p '{"task":"go to https://news.ycombinator.com and list top 5 articles"}'
     kernel logs python-cua -f # Open in separate tab
