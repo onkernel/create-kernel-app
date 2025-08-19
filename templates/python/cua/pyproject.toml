@@ -16,7 +16,7 @@ dependencies = [
     "httpx==0.28.1",
     "idna==3.10",
     "jiter==0.10.0",
-    "pillow==11.2.1",
+    "pillow==11.3.0",
     "kernel>=0.8.1",
     "playwright==1.52.0",
     "pydantic==2.11.7",
