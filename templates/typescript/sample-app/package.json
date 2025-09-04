@@ -1,14 +1,13 @@
 {
-    "name": "ts-basic",
-    "module": "index.ts",
-    "type": "module",
-    "private": true,
-    "peerDependencies": {
-      "typescript": "^5"
-    },
-    "dependencies": {
-      "@onkernel/sdk": ">=0.8.0",
-      "playwright": "^1.52.0"
-    }
+  "name": "ts-basic",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@onkernel/sdk": ">=0.11.0",
+    "playwright": "^1.52.0"
   }
-  
+}
