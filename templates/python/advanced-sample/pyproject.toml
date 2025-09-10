@@ -5,7 +5,7 @@ description = "Sample application implementing advanced Kernel configs"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "kernel>=0.11.0",
+    "kernel>=0.11.1",
     "playwright>=1.52.0"
 ]
 
