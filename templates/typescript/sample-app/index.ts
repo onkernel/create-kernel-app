@@ -78,7 +78,7 @@ app.action<PageTitleInput, PageTitleOutput>(
 /**
  * Example app that instantiates a persisted Kernel browser that can be reused across invocations
  * Invoke this action to test Kernel browsers manually with our browser live view
- * https://docs.onkernel.com/launch/browser-persistence
+ * https://onkernel.com/docs/launch/browser-persistence
  * Args:
  *     ctx: Kernel context containing invocation information
  * Returns:
