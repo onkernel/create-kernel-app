@@ -1,6 +1,5 @@
 import { Kernel, type KernelContext } from '@onkernel/sdk';
 import { samplingLoop } from './loop';
-import { chromium } from 'playwright';
 
 const kernel = new Kernel();
 
@@ -15,7 +14,7 @@ interface QueryOutput {
 }
 
 // LLM API Keys are set in the environment during `kernel deploy <filename> -e ANTHROPIC_API_KEY=XXX`
-// See https://docs.onkernel.com/launch/deploy#environment-variables
+// See https://onkernel.com/docs/launch/deploy#environment-variables
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 if (!ANTHROPIC_API_KEY) {

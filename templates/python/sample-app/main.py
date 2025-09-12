@@ -68,7 +68,7 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
 """
 Example app that instantiates a persisted Kernel browser that can be reused across invocations
 Invoke this action to test Kernel browsers manually with our browser live view
-https://docs.onkernel.com/launch/browser-persistence
+https://onkernel.com/docs/browsers/persistence
 Args:
     ctx: Kernel context containing invocation information
 Returns:
