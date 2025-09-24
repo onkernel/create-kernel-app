@@ -1,5 +1,5 @@
 from browser_use.llm import ChatOpenAI
-from browser_use import Agent
+from browser_use import Agent, Browser
 import kernel
 from kernel import Kernel
 from typing import TypedDict
@@ -34,11 +34,21 @@ async def bu_task(ctx: kernel.KernelContext, input_data: TaskInput):
     #######################################
     # Your Browser Use implementation here
     #######################################
+
+    browser = Browser(
+        cdp_url=kernel_browser.cdp_ws_url,
+        headless=False,
+        window_size={'width': 1024, 'height': 786},
+        viewport={'width': 1024, 'height': 786},
+        device_scale_factor=1.0
+    )
+
     agent = Agent(
         #task="Compare the price of gpt-4o and DeepSeek-V3",
         task=input_data["task"],
         llm=llm,
-        browser_session=BrowserSessionCustomResize(cdp_url=kernel_browser.cdp_ws_url)
+        # browser_session=BrowserSessionCustomResize(cdp_url=kernel_browser.cdp_ws_url)
+        browser_session=browser
     )
     result = await agent.run()
     if result.final_result() is not None:

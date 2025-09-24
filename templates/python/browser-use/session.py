@@ -1,3 +1,5 @@
+# This file may be needed to help resize the browser session for projects using browser-use versions < 0.7.9
+
 from browser_use import BrowserSession
 
 # Define a subclass of BrowserSession that overrides _setup_viewports (which mishandles resizeing on connecting via cdp)
