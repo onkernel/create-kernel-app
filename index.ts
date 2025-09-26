@@ -19,7 +19,8 @@ type TemplateKey =
   | "stagehand"
   | "advanced-sample"
   | "computer-use"
-  | "cua";
+  | "cua"
+  | "magnitude";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -36,6 +37,7 @@ const TEMPLATE_STAGEHAND = "stagehand";
 const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
 const TEMPLATE_CUA = "cua";
+const TEMPLATE_MAGNITUDE = "magnitude";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 
@@ -79,6 +81,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements a Computer Use Agent (OpenAI CUA) sample",
     languages: [LANGUAGE_TYPESCRIPT, LANGUAGE_PYTHON],
   },
+  [TEMPLATE_MAGNITUDE]: {
+    name: "Magnitude",
+    description: "Implements the Magnitude.run SDK",
+    languages: [LANGUAGE_TYPESCRIPT],
+  },
 };
 
 const INVOKE_SAMPLES: Record<
@@ -95,6 +102,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke ts-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
+    [TEMPLATE_MAGNITUDE]:
+      'kernel invoke ts-magnitude mag-url-extract --payload \'{"url": "https://en.wikipedia.org/wiki/Special:Random"}\'',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -120,6 +129,7 @@ const REGISTERED_APP_NAMES: Record<
     [TEMPLATE_ADVANCED_SAMPLE]: "ts-advanced",
     [TEMPLATE_COMPUTER_USE]: "ts-cu",
     [TEMPLATE_CUA]: "ts-cua",
+    [TEMPLATE_MAGNITUDE]: "ts-magnitude",
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]: "python-basic",
@@ -358,6 +368,8 @@ function printNextSteps(
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_COMPUTER_USE
       ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
+      : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_MAGNITUDE
+      ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_CUA
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_PYTHON &&
@@ -403,7 +415,7 @@ program
   )
   .option(
     "-t, --template <template>",
-    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE})`
+    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE}, ${TEMPLATE_CUA}, ${TEMPLATE_MAGNITUDE})`
   )
   .action(
     async (
