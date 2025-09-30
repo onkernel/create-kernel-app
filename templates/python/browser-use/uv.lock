@@ -181,10 +181,9 @@ wheels = [
 
 [[package]]
 name = "browser-use"
-version = "0.7.9"
+version = "0.7.10"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "anthropic" },
     { name = "anyio" },
@@ -217,9 +216,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "uuid7" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/94/bf/b920e6473d6f1cc539d55763f7494309f5614c877166ea3227390505f926/browser_use-0.7.9.tar.gz", hash = "sha256:55a30864a422ce860f6879c1a92c783a583e1dafde3694b1e0aeb8e6d56510ac", size = 332833, upload-time = "2025-09-19T19:26:40.61Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c1/ee/e4f4c198dbef1f7ad1bbf74259a4e5a8a9802d29c33ebd0dee3d3938bc0d/browser_use-0.7.10.tar.gz", hash = "sha256:f93ce59e06906c12d120360dee4aa33d83618ddf7c9a575dd0ac517d2de7ccbc", size = 334820, upload-time = "2025-09-29T17:51:56.348Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b3/9b/94e6ce590521d9075778a6b015eb023c73b56c8ed8aea8453440d9317569/browser_use-0.7.9-py3-none-any.whl", hash = "sha256:16a16d2053274380d31ca4f4109621ba7e4dbff367139ea40eaf9ac9a9a6c936", size = 407067, upload-time = "2025-09-19T19:26:38.949Z" },
+    { url = "https://files.pythonhosted.org/packages/10/bd/ed34c505661476c8e319000ecde8f78516c60001f50bd36926c2b9f50651/browser_use-0.7.10-py3-none-any.whl", hash = "sha256:669e12571a0c0c4c93e5fd26abf9e2534eb9bacbc510328aedcab795bd8906a9", size = 409141, upload-time = "2025-09-29T17:51:53.224Z" },
 ]
 
 [[package]]
@@ -3960,7 +3959,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "browser-use", specifier = ">=0.7.0" },
+    { name = "browser-use", specifier = ">=0.7.10" },
     { name = "kernel", specifier = ">=0.11.1" },
     { name = "pydantic", specifier = ">=2.10.6" },
 ]
