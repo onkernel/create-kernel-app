@@ -20,7 +20,8 @@ type TemplateKey =
   | "advanced-sample"
   | "computer-use"
   | "cua"
-  | "magnitude";
+  | "magnitude"
+  | "gemini-cua";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -38,6 +39,7 @@ const TEMPLATE_ADVANCED_SAMPLE = "advanced-sample";
 const TEMPLATE_COMPUTER_USE = "computer-use";
 const TEMPLATE_CUA = "cua";
 const TEMPLATE_MAGNITUDE = "magnitude";
+const TEMPLATE_GEMINI_CUA = "gemini-cua";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 
@@ -86,6 +88,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements the Magnitude.run SDK",
     languages: [LANGUAGE_TYPESCRIPT],
   },
+  [TEMPLATE_GEMINI_CUA]: {
+    name: "Gemini Computer Use",
+    description: "Implements Gemini 2.5 Computer Use Agent with Stagehand",
+    languages: [LANGUAGE_TYPESCRIPT],
+  },
 };
 
 const INVOKE_SAMPLES: Record<
@@ -104,6 +111,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke ts-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
     [TEMPLATE_MAGNITUDE]:
       'kernel invoke ts-magnitude mag-url-extract --payload \'{"url": "https://en.wikipedia.org/wiki/Special:Random"}\'',
+    [TEMPLATE_GEMINI_CUA]:
+      'kernel invoke ts-gemini-cua gemini-cua-task',
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]:
@@ -130,6 +139,7 @@ const REGISTERED_APP_NAMES: Record<
     [TEMPLATE_COMPUTER_USE]: "ts-cu",
     [TEMPLATE_CUA]: "ts-cua",
     [TEMPLATE_MAGNITUDE]: "ts-magnitude",
+    [TEMPLATE_GEMINI_CUA]: "ts-gemini-cua",
   },
   [LANGUAGE_PYTHON]: {
     [TEMPLATE_SAMPLE_APP]: "python-basic",
@@ -372,6 +382,8 @@ function printNextSteps(
       ? "kernel deploy index.ts --env ANTHROPIC_API_KEY=XXX"
       : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_CUA
       ? "kernel deploy index.ts --env OPENAI_API_KEY=XXX"
+      : language === LANGUAGE_TYPESCRIPT && template === TEMPLATE_GEMINI_CUA
+      ? "kernel deploy index.ts --env GOOGLE_API_KEY=XXX --env OPENAI_API_KEY=XXX"
       : language === LANGUAGE_PYTHON &&
         (template === TEMPLATE_SAMPLE_APP ||
           template === TEMPLATE_ADVANCED_SAMPLE)
@@ -415,7 +427,7 @@ program
   )
   .option(
     "-t, --template <template>",
-    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE}, ${TEMPLATE_CUA}, ${TEMPLATE_MAGNITUDE})`
+    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE}, ${TEMPLATE_CUA}, ${TEMPLATE_MAGNITUDE}, ${TEMPLATE_GEMINI_CUA})`
   )
   .action(
     async (
