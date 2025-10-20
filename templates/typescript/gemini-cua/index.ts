@@ -30,18 +30,6 @@ if (!GOOGLE_API_KEY) {
 
 async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutput> {
   // Executes a Computer Use Agent (CUA) task using Gemini 2.5 and Stagehand
-  //
-  // This function supports dual execution modes:
-  // - Action Handler Mode: Called with invocation_id from Kernel app action context
-  // - Local Mode: Called without invocation_id for direct script execution
-  //
-  // Args:
-  //     invocationId: Optional Kernel invocation ID to associate browser with action
-  //
-  // App Actions Returns:
-  //     SearchQueryOutput: Success status and result message from the agent
-  // Local Execution Returns:
-  //     Logs the result of the agent execution
 
   const browserOptions = invocationId
     ? { invocation_id: invocationId, stealth: true }
