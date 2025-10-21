@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@browserbasehq/stagehand": "^2.5.2",
-    "@onkernel/sdk": "^0.14.0",
-    "zod": "^3.25.7"
+    "@onkernel/sdk": "^0.15.0",
+    "zod": "^3.25.67"
   }
 }
