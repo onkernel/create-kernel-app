@@ -10,6 +10,7 @@ const app = kernel.app('ts-gemini-cua');
 interface SearchQueryOutput {
   success: boolean;
   result: string;
+  error?: string;
 }
 
 // API Keys for LLM providers
@@ -84,16 +85,15 @@ async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutpu
 
     console.log("result: ", result);
 
-    console.log("Deleting browser and closing stagehand...");
-    await stagehand.close();
-    await kernel.browsers.deleteByID(kernelBrowser.session_id);
     return { success: true, result: result.message };
   } catch (error) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return { success: false, result: "", error: errorMessage };
+  } finally {
     console.log("Deleting browser and closing stagehand...");
     await stagehand.close();
     await kernel.browsers.deleteByID(kernelBrowser.session_id);
-    return { success: false, result: "" };
   }
 }
 

@@ -90,7 +90,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   },
   [TEMPLATE_GEMINI_CUA]: {
     name: "Gemini Computer Use",
-    description: "Implements Gemini 2.5 Computer Use Agent with Stagehand",
+    description: "Implements Gemini 2.5 Computer Use Agent",
     languages: [LANGUAGE_TYPESCRIPT],
   },
 };
