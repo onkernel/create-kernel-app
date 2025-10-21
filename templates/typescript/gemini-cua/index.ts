@@ -32,9 +32,15 @@ if (!GOOGLE_API_KEY) {
 async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutput> {
   // Executes a Computer Use Agent (CUA) task using Gemini 2.5 and Stagehand
 
-  const browserOptions = invocationId
-    ? { invocation_id: invocationId, stealth: true }
-    : { stealth: true };
+  const browserOptions = {
+    stealth: true,
+    // viewport: {
+    //   width: 1440,
+    //   height: 900,
+    //   refresh_rate: 25
+    // },
+    ...(invocationId && { invocation_id: invocationId })
+  };
 
   const kernelBrowser = await kernel.browsers.create(browserOptions);
 
