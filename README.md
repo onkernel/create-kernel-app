@@ -113,7 +113,7 @@ kernel deploy index.ts  # --env OPENAI_API_KEY=XXX if Stagehand; --env ANTHROPIC
 kernel deploy main.py   # --env OPENAI_API_KEY=XXX if Browser Use
 ```
 
-If deploying an app that requires environment variables, make sure to [set them](https://docs.onkernel.com/launch/deploy#environment-variables) when you `deploy`.
+If deploying an app that requires environment variables, make sure to [set them](https://onkernel.com/docs/launch/deploy#environment-variables) when you `deploy`.
 
 5. Invoke your application:
 
@@ -157,7 +157,7 @@ These are the sample apps currently available when you run `npx @onkernel/create
 
 For more information about Kernel and its features, visit:
 
-- [Kernel Documentation](https://docs.onkernel.com/quickstart)
+- [Kernel Documentation](https://onkernel.com/docs/quickstart)
 - [Kernel Homepage](https://onkernel.com)
 
 ## Contributing

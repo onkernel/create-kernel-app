@@ -15,7 +15,7 @@ interface SearchQueryOutput {
 }
 
 // LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
-// See https://docs.onkernel.com/launch/deploy#environment-variables
+// See https://onkernel.com/docs/launch/deploy#environment-variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {

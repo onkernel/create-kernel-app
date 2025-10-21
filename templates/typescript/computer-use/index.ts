@@ -15,7 +15,7 @@ interface QueryOutput {
 }
 
 // LLM API Keys are set in the environment during `kernel deploy <filename> -e ANTHROPIC_API_KEY=XXX`
-// See https://docs.onkernel.com/launch/deploy#environment-variables
+// See https://onkernel.com/docs/launch/deploy#environment-variables
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 if (!ANTHROPIC_API_KEY) {
@@ -66,11 +66,11 @@ app.action<QueryInput, QueryOutput>(
         throw new Error('Failed to get the last message from the sampling loop');
       }
 
-      const result = typeof lastMessage.content === 'string' 
-        ? lastMessage.content 
-        : lastMessage.content.map(block => 
-            block.type === 'text' ? block.text : ''
-          ).join('');
+      const result = typeof lastMessage.content === 'string'
+        ? lastMessage.content
+        : lastMessage.content.map(block =>
+          block.type === 'text' ? block.text : ''
+        ).join('');
 
       return { result };
     } catch (error) {
