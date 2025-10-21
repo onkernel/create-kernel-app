@@ -13,7 +13,7 @@ class TaskInput(TypedDict):
     task: str
     
 # LLM API Keys are set in the environment during `kernel deploy <filename> -e OPENAI_API_KEY=XXX`
-# See https://docs.onkernel.com/launch/deploy#environment-variables
+# See https://onkernel.com/docs/launch/deploy#environment-variables
 llm = ChatOpenAI(model="gpt-4.1")
 
 @app.action("bu-task")
