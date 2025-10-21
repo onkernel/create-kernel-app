@@ -1,5 +1,6 @@
 import { Kernel, type KernelContext } from '@onkernel/sdk';
 import { samplingLoop } from './loop';
+import { chromium } from 'playwright';
 
 const kernel = new Kernel();
 
@@ -65,11 +66,11 @@ app.action<QueryInput, QueryOutput>(
         throw new Error('Failed to get the last message from the sampling loop');
       }
 
-      const result = typeof lastMessage.content === 'string' 
-        ? lastMessage.content 
-        : lastMessage.content.map(block => 
-            block.type === 'text' ? block.text : ''
-          ).join('');
+      const result = typeof lastMessage.content === 'string'
+        ? lastMessage.content
+        : lastMessage.content.map(block =>
+          block.type === 'text' ? block.text : ''
+        ).join('');
 
       return { result };
     } catch (error) {
