@@ -1,5 +1,5 @@
 import { Stagehand } from "@browserbasehq/stagehand";
-import client, { Kernel, type KernelContext } from '@onkernel/sdk';
+import { Kernel, type KernelContext } from '@onkernel/sdk';
 
 const kernel = new Kernel({
   apiKey: process.env.KERNEL_API_KEY
