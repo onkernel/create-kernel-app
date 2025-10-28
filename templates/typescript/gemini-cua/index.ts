@@ -34,11 +34,6 @@ async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutpu
 
   const browserOptions = {
     stealth: true,
-    // viewport: {
-    //   width: 1440,
-    //   height: 900,
-    //   refresh_rate: 25
-    // },
     ...(invocationId && { invocation_id: invocationId })
   };
 
