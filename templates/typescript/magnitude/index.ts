@@ -58,9 +58,6 @@ app.action<UrlInput, UrlsOutput>(
       },
       browser: { 
         cdp: kernelBrowser.cdp_ws_url, 
-        contextOptions: { 
-          viewport: { width: 1024, height: 768 } 
-        } 
       },
       virtualScreenDimensions: { width: 1024, height: 768 }
     });
