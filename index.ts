@@ -65,7 +65,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   },
   [TEMPLATE_STAGEHAND]: {
     name: "Stagehand",
-    description: "Implements the Stagehand SDK",
+    description: "Implements the Stagehand v3 SDK",
     languages: [LANGUAGE_TYPESCRIPT],
   },
   [TEMPLATE_ADVANCED_SAMPLE]: {
