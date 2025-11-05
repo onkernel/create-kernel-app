@@ -6,11 +6,11 @@ const kernel = new Kernel();
 
 const app = kernel.app('ts-stagehand');
 
-interface SearchQueryInput {
-  query: string;
+interface CompanyInput {
+  company: string;
 }
 
-interface SearchQueryOutput {
+interface TeamSizeOutput {
   teamSize: string;
 }
 
@@ -23,9 +23,9 @@ if (!OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set');
 }
 
-app.action<SearchQueryInput, SearchQueryOutput>(
-  'headcount-task',
-  async (ctx: KernelContext, payload?: SearchQueryInput): Promise<SearchQueryOutput> => {
+app.action<CompanyInput, TeamSizeOutput>(
+  'teamsize-task',
+  async (ctx: KernelContext, payload?: CompanyInput): Promise<TeamSizeOutput> => {
     // A function that returns the team size of a Y Combinator startup
 
     // Args:
@@ -35,7 +35,7 @@ app.action<SearchQueryInput, SearchQueryOutput>(
     // Returns:
     //     output: The team size (number of employees) of the startup
 
-    const query = payload?.query || 'kernel';
+    const company = payload?.company || 'kernel';
 
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
@@ -62,7 +62,7 @@ app.action<SearchQueryInput, SearchQueryOutput>(
     const page = stagehand.context.pages()[0];
     await page.goto("https://www.ycombinator.com/companies");
 
-    await stagehand.act(`Type in ${query} into the search box`);
+    await stagehand.act(`Type in ${company} into the search box`);
     await stagehand.act("Click on the first search result");
 
     // Schema definition

@@ -4,13 +4,13 @@ A Stagehand-powered browser automation app that extracts team size information f
 
 ## What it does
 
-The `headcount-task` searches for a startup on Y Combinator's company directory and extracts the team size (number of employees).
+The `teamsize-task` searches for a startup on Y Combinator's company directory and extracts the team size (number of employees).
 
 ## Input
 
 ```json
 {
-  "query": "kernel"  // Startup name to search (optional, defaults to "kernel")
+  "company": "kernel"  // Startup name to search (optional, defaults to "kernel")
 }
 ```
 
@@ -41,10 +41,10 @@ kernel deploy index.ts --env-file .env
 
 Default query (searches for "kernel"):
 ```bash
-kernel invoke ts-stagehand headcount-task
+kernel invoke ts-stagehand teamsize-task
 ```
 
 Custom query:
 ```bash
-kernel invoke ts-stagehand headcount-task --payload '{"query": "Mixpanel"}'
+kernel invoke ts-stagehand teamsize-task --payload '{"company": "Mixpanel"}'
 ```
