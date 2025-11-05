@@ -65,7 +65,7 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
   },
   [TEMPLATE_STAGEHAND]: {
     name: "Stagehand",
-    description: "Implements the Stagehand SDK",
+    description: "Implements the Stagehand v3 SDK",
     languages: [LANGUAGE_TYPESCRIPT],
   },
   [TEMPLATE_ADVANCED_SAMPLE]: {
@@ -103,7 +103,7 @@ const INVOKE_SAMPLES: Record<
     [TEMPLATE_SAMPLE_APP]:
       'kernel invoke ts-basic get-page-title --payload \'{"url": "https://www.google.com"}\'',
     [TEMPLATE_STAGEHAND]:
-      'kernel invoke ts-stagehand stagehand-task --payload \'{"query": "Best wired earbuds"}\'',
+      'kernel invoke ts-stagehand teamsize-task --payload \'{"company": "Kernel"}\'',
     [TEMPLATE_ADVANCED_SAMPLE]: "kernel invoke ts-advanced test-captcha-solver",
     [TEMPLATE_COMPUTER_USE]:
       'kernel invoke ts-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
