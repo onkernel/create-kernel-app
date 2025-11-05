@@ -41,10 +41,10 @@ kernel deploy index.ts --env-file .env
 
 Default query (searches for "kernel"):
 ```bash
-kernel invoke ts-stagehand-v3 headcount-task
+kernel invoke ts-stagehand headcount-task
 ```
 
 Custom query:
 ```bash
-kernel invoke ts-stagehand-v3 headcount-task --payload '{"query": "Mixpanel"}'
+kernel invoke ts-stagehand headcount-task --payload '{"query": "Mixpanel"}'
 ```
