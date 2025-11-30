@@ -25,7 +25,6 @@ async def test_captcha_solver(ctx: kernel.KernelContext) -> None:
     kernel_browser = client.browsers.create(
         invocation_id=ctx.invocation_id,
         stealth=True,
-        persistence={"id": "captcha-solver"}
     )
     
     async with async_playwright() as playwright:
