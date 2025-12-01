@@ -70,7 +70,7 @@ app.action<PageTitleInput, PageTitleOutput>(
       const title = await page.title();
       return { title };
     } finally {
-      await browser.close();
+      await kernel.browsers.deleteByID(kernelBrowser.session_id);
     }
   }
 );
@@ -90,7 +90,7 @@ app.action<PageTitleInput, PageTitleOutput>(
  *  kernel logs ts-basic -f # Open in separate tab
  */
 interface CreateBrowserForTestingOutput {
-  browser_live_view_url?: string;
+  browser_live_view_url: string;
 }
 app.action(
   "create-browser-for-testing",

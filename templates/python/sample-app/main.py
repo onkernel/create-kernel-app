@@ -62,7 +62,7 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
             
             return {"title": title}
         finally:
-            await browser.close()
+            client.browsers.delete_by_id(kernel_browser.session_id)
 
 
 """
