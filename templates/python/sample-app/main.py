@@ -62,13 +62,13 @@ async def get_page_title(ctx: kernel.KernelContext, input_data: PageTitleInput) 
             
             return {"title": title}
         finally:
-            await browser.close()
+            client.browsers.delete_by_id(kernel_browser.session_id)
 
 
 """
-Example app that instantiates a persisted Kernel browser that can be reused across invocations
+Example app that creates a long-running Kernel browser for manual testing
 Invoke this action to test Kernel browsers manually with our browser live view
-https://onkernel.com/docs/browsers/persistence
+https://onkernel.com/docs/browsers/live-view
 Args:
     ctx: Kernel context containing invocation information
 Returns:
@@ -76,18 +76,18 @@ Returns:
 Invoke this via CLI:
     kernel login  # or: export KERNEL_API_KEY=<your_api_key>
     kernel deploy main.py # If you haven't already deployed this app
-    kernel invoke python-basic create-persisted-browser
+    kernel invoke python-basic create-browser-for-testing
     kernel logs python-basic -f # Open in separate tab
 """
-class CreatePersistedBrowserOutput(TypedDict):
+class CreateBrowserForTestingOutput(TypedDict):
     browser_live_view_url: str
 
-@app.action("create-persisted-browser")
-async def create_persisted_browser(ctx: kernel.KernelContext) -> CreatePersistedBrowserOutput:
+@app.action("create-browser-for-testing")
+async def create_browser_for_testing(ctx: kernel.KernelContext) -> CreateBrowserForTestingOutput:
     kernel_browser = client.browsers.create(
         invocation_id=ctx.invocation_id,
-        persistence={"id": "persisted-browser"},
-        stealth=True, # Turns on residential proxy & auto-CAPTCHA solver
+        stealth=True,
+        timeout_seconds=3600,  # Keep browser alive for 1 hour
     )
 
     return {

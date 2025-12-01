@@ -24,9 +24,6 @@ app.action("test-captcha-solver", async (ctx: KernelContext): Promise<void> => {
   const kernelBrowser = await kernel.browsers.create({
     invocation_id: ctx.invocation_id,
     stealth: true,
-    persistence: {
-      id: "captcha-solver",
-    },
   });
   const browser = await chromium.connectOverCDP(kernelBrowser.cdp_ws_url);
 

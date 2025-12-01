@@ -70,15 +70,15 @@ app.action<PageTitleInput, PageTitleOutput>(
       const title = await page.title();
       return { title };
     } finally {
-      await browser.close();
+      await kernel.browsers.deleteByID(kernelBrowser.session_id);
     }
   }
 );
 
 /**
- * Example app that instantiates a persisted Kernel browser that can be reused across invocations
+ * Example app that creates a long-running Kernel browser for manual testing
  * Invoke this action to test Kernel browsers manually with our browser live view
- * https://onkernel.com/docs/browsers/persistence
+ * https://onkernel.com/docs/browsers/live-view
  * Args:
  *     ctx: Kernel context containing invocation information
  * Returns:
@@ -86,21 +86,19 @@ app.action<PageTitleInput, PageTitleOutput>(
  * Invoke this via CLI:
  *  kernel login  # or: export KERNEL_API_KEY=<your_api_key>
  *  kernel deploy index.ts # If you haven't already deployed this app
- *  kernel invoke ts-basic create-persisted-browser
+ *  kernel invoke ts-basic create-browser-for-testing
  *  kernel logs ts-basic -f # Open in separate tab
  */
-interface CreatePersistedBrowserOutput {
+interface CreateBrowserForTestingOutput {
   browser_live_view_url: string;
 }
 app.action(
-  "create-persisted-browser",
-  async (ctx: KernelContext): Promise<CreatePersistedBrowserOutput> => {
+  "create-browser-for-testing",
+  async (ctx: KernelContext): Promise<CreateBrowserForTestingOutput> => {
     const kernelBrowser = await kernel.browsers.create({
       invocation_id: ctx.invocation_id,
-      persistence: {
-        id: "persisted-browser",
-      },
-      stealth: true, // Turns on residential proxy & auto-CAPTCHA solver
+      stealth: true,
+      timeout_seconds: 3600, // Keep browser alive for 1 hour
     });
 
     return {
