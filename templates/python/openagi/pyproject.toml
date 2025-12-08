@@ -1,0 +1,11 @@
+[project]
+name = "python-openagi"
+version = "0.1.0"
+description = "Kernel sample app for OpenAGI Lux computer-use model"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "kernel>=0.20.0",
+    "oagi>=0.11.0",
+    "Pillow>=10.0.0",
+]

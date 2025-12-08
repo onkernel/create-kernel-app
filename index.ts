@@ -21,7 +21,8 @@ type TemplateKey =
   | "computer-use"
   | "cua"
   | "magnitude"
-  | "gemini-cua";
+  | "gemini-cua"
+  | "openagi";
 type LanguageInfo = { name: string; shorthand: string };
 type TemplateInfo = {
   name: string;
@@ -40,6 +41,7 @@ const TEMPLATE_COMPUTER_USE = "computer-use";
 const TEMPLATE_CUA = "cua";
 const TEMPLATE_MAGNITUDE = "magnitude";
 const TEMPLATE_GEMINI_CUA = "gemini-cua";
+const TEMPLATE_OPENAGI = "openagi";
 const LANGUAGE_SHORTHAND_TS = "ts";
 const LANGUAGE_SHORTHAND_PY = "py";
 
@@ -93,6 +95,11 @@ const TEMPLATES: Record<TemplateKey, TemplateInfo> = {
     description: "Implements Gemini 2.5 Computer Use Agent",
     languages: [LANGUAGE_TYPESCRIPT],
   },
+  [TEMPLATE_OPENAGI]: {
+    name: "OpenAGI Lux",
+    description: "Implements the OpenAGI Lux computer-use model",
+    languages: [LANGUAGE_PYTHON],
+  },
 };
 
 const INVOKE_SAMPLES: Record<
@@ -125,6 +132,8 @@ const INVOKE_SAMPLES: Record<
       'kernel invoke python-cu cu-task --payload \'{"query": "Return the first url of a search result for NYC restaurant reviews Pete Wells"}\'',
     [TEMPLATE_CUA]:
       'kernel invoke python-cua cua-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
+    [TEMPLATE_OPENAGI]:
+      'kernel invoke python-openagi openagi-task --payload \'{"task": "Go to https://news.ycombinator.com and get the top 5 articles"}\'',
   },
 };
 
@@ -147,6 +156,7 @@ const REGISTERED_APP_NAMES: Record<
     [TEMPLATE_ADVANCED_SAMPLE]: "python-advanced",
     [TEMPLATE_COMPUTER_USE]: "python-cu",
     [TEMPLATE_CUA]: "python-cua",
+    [TEMPLATE_OPENAGI]: "python-openagi",
   },
 };
 
@@ -394,6 +404,8 @@ function printNextSteps(
       ? "kernel deploy main.py --env ANTHROPIC_API_KEY=XXX"
       : language === LANGUAGE_PYTHON && template === TEMPLATE_CUA
       ? "kernel deploy main.py --env OPENAI_API_KEY=XXX"
+      : language === LANGUAGE_PYTHON && template === TEMPLATE_OPENAGI
+      ? "kernel deploy main.py --env OAGI_API_KEY=XXX"
       : "";
 
   console.log(
@@ -427,7 +439,7 @@ program
   )
   .option(
     "-t, --template <template>",
-    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE}, ${TEMPLATE_CUA}, ${TEMPLATE_MAGNITUDE}, ${TEMPLATE_GEMINI_CUA})`
+    `Template type (${TEMPLATE_SAMPLE_APP}, ${TEMPLATE_BROWSER_USE}, ${TEMPLATE_STAGEHAND}, ${TEMPLATE_ADVANCED_SAMPLE}, ${TEMPLATE_COMPUTER_USE}, ${TEMPLATE_CUA}, ${TEMPLATE_MAGNITUDE}, ${TEMPLATE_GEMINI_CUA}, ${TEMPLATE_OPENAGI})`
   )
   .action(
     async (
