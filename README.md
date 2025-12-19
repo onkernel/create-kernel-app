@@ -1,4 +1,6 @@
-# create-kernel-app
+# See instead: https://github.com/onkernel/cli
+
+## create-kernel-app
 
 <p align="left">
   <img alt="GitHub License" src="https://img.shields.io/github/license/onkernel/create-kernel-app">
