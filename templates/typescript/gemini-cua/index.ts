@@ -49,11 +49,9 @@ async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutpu
   const stagehand = new Stagehand({
     env: "LOCAL",
     verbose: 1,
-    domSettleTimeoutMs: 30_000,
-    modelName: "gpt-4o",
-    modelClientOptions: {
-      apiKey: OPENAI_API_KEY
-    },
+    domSettleTimeout: 30_000,
+    model: "openai/gpt-4o",
+    apiKey: OPENAI_API_KEY,
     localBrowserLaunchOptions: {
       cdpUrl: kernelBrowser.cdp_ws_url
     }
@@ -64,7 +62,7 @@ async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutpu
   // Your Stagehand implementation here
   /////////////////////////////////////
   try {
-    const page = stagehand.page;
+    const page = stagehand.context.pages()[0];
 
     const agent = stagehand.agent({
       provider: "google",
