@@ -50,7 +50,7 @@ async function runStagehandTask(invocationId?: string): Promise<SearchQueryOutpu
     env: "LOCAL",
     verbose: 1,
     domSettleTimeout: 30_000,
-    model: "openai/gpt-4o",
+    model: "openai/gpt-4.1",
     apiKey: OPENAI_API_KEY,
     localBrowserLaunchOptions: {
       cdpUrl: kernelBrowser.cdp_ws_url
